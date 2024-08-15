@@ -43,3 +43,15 @@ variable "cognito_users" {
     }
   }
 }
+
+variable "amplifier_vpclinkname" {
+  description = "A prefix for naming resources."
+  type        = string
+  default     = "amplifier-link"
+}
+
+variable "nlb_arn" {
+  description = "A prefix for naming resources."
+  type        = string
+  default     = ""
+}

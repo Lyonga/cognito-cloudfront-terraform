@@ -10,7 +10,11 @@ resource "aws_cognito_user_pool" "amplifier_cognito_user_pool" {
     }
   }
   password_policy {
-    minimum_length = 6
+    minimum_length = 8
+    require_lowercase = true
+    require_numbers = true
+    require_symbols = true
+    require_uppercase = true
   }
 
   verification_message_template {
@@ -31,18 +35,6 @@ resource "aws_cognito_user_pool" "amplifier_cognito_user_pool" {
       max_length = 256
     }
   }
-  # schema {
-  #   attribute_data_type      = "String"
-  #   developer_only_attribute = false
-  #   mutable                  = true
-  #   name                     = "foo"
-  #   required                 = false
-
-  #   string_attribute_constraints {
-  #     min_length = 1
-  #     max_length = 256
-  #   }
-  # }
 }
 
 resource "aws_cognito_user_pool_client" "amplifiercognito_user_pool_client" {
@@ -58,6 +50,8 @@ resource "aws_cognito_user_pool_client" "amplifiercognito_user_pool_client" {
     "ALLOW_USER_SRP_AUTH",
     "ALLOW_REFRESH_TOKEN_AUTH"
   ]
+  # callback_urls = ["https://your-app.com/callback"]
+  # logout_urls = ["https://your-app.com/logout"]
 }
 
 
@@ -243,4 +237,3 @@ policy = jsonencode({
     ]
   })
 }
-
