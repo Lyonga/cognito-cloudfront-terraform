@@ -79,3 +79,110 @@ variable "environment" {
   description = "amplifier tes environment"
   default = "dev"
 }
+
+variable "cluster_name" {
+  type        = string
+  description = "The name of the cluster"
+  default = "amplifier-cluster"
+}
+
+variable "cluster_tag_name" {
+  type        = string
+  description = "Name tag for the cluster"
+  default     = "amplifier-cluster"
+}
+
+
+
+variable "name" {
+  type        = string
+  description = "The name of the application and the family"
+  default     = "amplifier-task"
+}
+
+variable "app_image" {
+  type = string 
+  description = "Container image to be used by the  application in task definition file"
+}
+
+variable "environment" {
+  type = string
+  description = "amplifier tes environment"
+}
+
+variable "fargate_cpu" {
+  type = number
+  description = "Fargate cpu allocation"
+  default = 512
+}
+
+variable "fargate_memory" {
+  type = number
+  description = "Fargate memory allocation"
+  default     = 1024
+}
+
+variable "app_port" {
+  type = number
+  description = "Application port number"
+  default     = 80
+}
+
+variable "public_subnet_ids" {
+  type = list(string)
+  description = "IDs for private subnets"
+  default = []
+}
+
+variable "vpc_id" {
+  type = string 
+  description = "The id for the VPC where the ECS container instance should be deployed"
+  default = "aws_vpc.custom_vpc.id"
+}
+
+variable "cluster_id" {
+  type = string 
+  description = "Cluster ID"
+  default = ""
+}
+
+variable "app_count" {
+  type = number 
+  description = "The number of instances of the task definition to place and keep running."
+  default = 1
+}
+
+variable "aws_security_group_ecs_tasks_id" {
+  type = string 
+  description = "The ID of the security group for the ECS tasks"
+}
+
+variable "vpc_cidr_block" {
+  type        = string
+  default     = "10.0.0.0/16"
+  description = "CIDR block range for vpc"
+}
+
+variable "private_subnet_cidr_blocks" {
+  type        = list(string)
+  default     = ["10.0.0.0/24", "10.0.4.0/24"]
+  description = "CIDR block range for the private subnets"
+}
+
+variable "security_group_lb_name" {
+  type        = string
+  default     = "alb-sg"
+  description = "Load Balancer security group name"
+}
+
+variable "security_group_lb_description" {
+  type        = string
+  default     = "controls access to the ALB"
+  description = "Load Balancer security group description"
+}
+
+variable "security_group_ecs_tasks_name" {
+  type        = string
+  default     = "ecs-tasks-sg"
+  description = "ECS Tasks security group name"
+}
