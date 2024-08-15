@@ -55,14 +55,14 @@ user_pool_id = aws_cognito_user_pool.app_cognito_user_pool.id
 }
 
 
-resource "aws_cognito_user" "example" {
+resource "aws_cognito_user" "amplifier" {
 user_pool_id = aws_cognito_user_pool.app_cognito_user_pool.id
 username     = "email"
 
 attributes = {
 terraform      = true
 foo            = "bar"
-email          = "no-reply@hashicorp.com"
+email          = "charles.lyonga03@gmail.com"
 email_verified = true
 }
 }
@@ -156,19 +156,50 @@ price_class = "PriceClass_All"
 restrictions {
     geo_restriction {
     restriction_type = "whitelist"
-    locations        = ["IN", "US", "CA"]
+    locations        = ["IN", "US"]
     }
 }
 
 viewer_certificate {
     cloudfront_default_certificate = true
 }
-
+web_acl_id = aws_wafv2_web_acl.cf_web_acl.arn
 tags = merge(var.common_tags, {
     Name = "${var.naming_prefix}-cloudfront"
 })
 }
 
+resource "aws_wafv2_web_acl" "cf_web_acl" {
+  name        = "cf-web-acl"
+  description = "Basic WAF for CloudFront"
+  scope       = "CLOUDFRONT" # Required for CloudFront distributions
+  default_action {
+    allow {}
+  }
+  visibility_config {
+    cloudwatch_metrics_enabled = true
+    metric_name                = "cfWebAcl"
+    sampled_requests_enabled   = true
+  }
+  rule {
+    name     = "AWS-AWSManagedRulesCommonRuleSet"
+    priority = 1
+    override_action {
+      none {}
+    }
+    statement {
+      managed_rule_group_statement {
+        vendor_name = "AWS"
+        name        = "AWSManagedRulesCommonRuleSet"
+      }
+    }
+    visibility_config {
+      cloudwatch_metrics_enabled = true
+      metric_name                = "CommonRuleSet"
+      sampled_requests_enabled   = true
+    }
+  }
+}
 data "aws_iam_policy_document" "s3_bucket_policy" {
 statement {
     actions   = ["s3:GetObject"]
