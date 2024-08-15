@@ -1,4 +1,4 @@
-resource "aws_cognito_user_pool" "app_cognito_user_pool" {
+resource "aws_cognito_user_pool" "amplifier_cognito_user_pool" {
   name = "app_cognito_user_pool"
 
   username_attributes         = ["email"]
@@ -45,9 +45,9 @@ resource "aws_cognito_user_pool" "app_cognito_user_pool" {
   # }
 }
 
-resource "aws_cognito_user_pool_client" "app_cognito_user_pool_client" {
+resource "aws_cognito_user_pool_client" "amplifiercognito_user_pool_client" {
   name         = "app_cognito_user_pool_client"
-  user_pool_id = aws_cognito_user_pool.app_cognito_user_pool.id
+  user_pool_id = aws_cognito_user_pool.amplifier_cognito_user_pool.id
 
   prevent_user_existence_errors = "ENABLED"
   supported_identity_providers  = ["COGNITO"]
@@ -63,12 +63,12 @@ resource "aws_cognito_user_pool_client" "app_cognito_user_pool_client" {
 
 resource "aws_cognito_user_pool_domain" "app_cognito_user_pool_domain" {
 domain       = "amplifier"
-user_pool_id = aws_cognito_user_pool.app_cognito_user_pool.id
+user_pool_id = aws_cognito_user_pool.amplifier_cognito_user_pool.id
 }
 
 
 resource "aws_cognito_user" "amplifier" {
-user_pool_id = aws_cognito_user_pool.app_cognito_user_pool.id
+user_pool_id = aws_cognito_user_pool.amplifier_cognito_user_pool.id
 username     = "charles.lyonga03@gmail.com"
 
 attributes = {
