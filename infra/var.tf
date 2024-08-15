@@ -65,7 +65,7 @@ variable "app_port" {
 variable "public_subnet_ids" {
   type = list(string)
   description = "IDs for private subnets"
-  default = [subnet-836b2f8d, subnet-fef97b98]
+  default = ["subnet-836b2f8d", "subnet-fef97b98"]
 }
 
 variable "vpc_id" {
