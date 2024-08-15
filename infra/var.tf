@@ -25,3 +25,21 @@ variable "source_files" {
   default     = "./webfiles"
 }
 
+variable "cognito_users" {
+  description = "Map of Cognito users to create with their attributes"
+  type = map(map(string))
+  default = {
+    "usertwo@example.com" = {
+      email_verified = "true"
+      email          = "usertwo@example.com"
+    }
+    "userone@example.com" = {
+      email_verified = "true"
+      email          = "userone@example.com"
+    },
+    "userthree@example.com" = {
+      email_verified = "true"
+      email          = "userthree@example.com"
+    }
+  }
+}

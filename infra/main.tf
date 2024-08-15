@@ -78,6 +78,16 @@ email          = "charles.lyonga03@gmail.com"
 email_verified = true
 }
 }
+resource "aws_cognito_user" "amplifier_users" {
+  for_each    = var.cognito_users
+  user_pool_id = aws_cognito_user_pool.amplifier_cognito_user_pool.id
+  username     = each.key
+
+  attributes = {
+    email          = each.value.email
+    email_verified = each.value.email_verified
+  }
+}
 
 # S3 static website bucket
 resource "aws_s3_bucket" "s3-static-website" {
