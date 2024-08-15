@@ -180,7 +180,7 @@ statement {
     condition {
     test     = "StringEquals"
     variable = "AWS:SourceArn"
-    values   =  aws_cloudfront_distribution.cf-dist.arn
+    values   =  [aws_cloudfront_distribution.cf-dist.arn] 
     }
 }
 }
