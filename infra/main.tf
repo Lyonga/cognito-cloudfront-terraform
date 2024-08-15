@@ -72,7 +72,7 @@ user_pool_id = aws_cognito_user_pool.amplifier_cognito_user_pool.id
 username     = "charles.lyonga03@gmail.com"
 
 attributes = {
-terraform      = true
+#terraform      = true
 #foo            = "bar"
 email          = "charles.lyonga03@gmail.com"
 email_verified = true
@@ -88,14 +88,13 @@ tags = merge(var.common_tags, {
 }
 
 # S3 public access settings
-# resource "aws_s3_bucket_public_access_block" "static_site_bucket_public_access" {
-# bucket = aws_s3_bucket.s3-static-website.id
-
-# block_public_acls       = false
-# block_public_policy     = false
-# ignore_public_acls      = false
-# restrict_public_buckets = false
-# }
+resource "aws_s3_bucket_public_access_block" "static_site_bucket_public_access" {
+bucket = aws_s3_bucket.s3-static-website.id
+block_public_acls       = false
+block_public_policy     = false
+ignore_public_acls      = false
+restrict_public_buckets = false
+}
 
 # S3 bucket static website configuration
 resource "aws_s3_bucket_website_configuration" "static_site_bucket_website_config" {
