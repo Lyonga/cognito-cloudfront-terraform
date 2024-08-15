@@ -172,7 +172,7 @@ tags = merge(var.common_tags, {
 data "aws_iam_policy_document" "s3_bucket_policy" {
 statement {
     actions   = ["s3:GetObject"]
-    resources = ["${var.bucket_arn}/*"]
+    resources = ["aws_s3_bucket.s3-static-website.arn/*"]
     principals {
     type        = "Service"
     identifiers = ["cloudfront.amazonaws.com"]
