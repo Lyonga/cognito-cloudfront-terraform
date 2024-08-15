@@ -40,7 +40,7 @@ variable "cloudfront_distribution_arn" {
   type        = string
 }
 
-# variable "bucket_id" {
-#   description = "The ID of the S3 bucket to apply the policy to."
-#   type        = string
-# }
+variable "bucket_id" {
+  description = "The ID of the S3 bucket to apply the policy to."
+  type        = string
+}
