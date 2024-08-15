@@ -25,22 +25,3 @@ variable "source_files" {
   default     = "./webfiles"
 }
 
-# variable "s3_bucket_id" {
-#   description = "The ID of the S3 bucket to use with CloudFront."
-#   type        = string
-# }
-
-# variable "bucket_arn" {
-#   description = "The ARN of the S3 bucket."
-#   type        = string
-# }
-
-# variable "cloudfront_distribution_arn" {
-#   description = "The ARN of the CloudFront distribution."
-#   type        = string
-# }
-
-# variable "bucket_id" {
-#   description = "The ID of the S3 bucket to apply the policy to."
-#   type        = string
-# }
