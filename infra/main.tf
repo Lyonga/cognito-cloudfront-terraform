@@ -31,6 +31,18 @@ resource "aws_cognito_user_pool" "app_cognito_user_pool" {
       max_length = 256
     }
   }
+  schema {
+    attribute_data_type      = "String"
+    developer_only_attribute = false
+    mutable                  = true
+    name                     = "foo"
+    required                 = false
+
+    string_attribute_constraints {
+      min_length = 1
+      max_length = 256
+    }
+  }
 }
 
 resource "aws_cognito_user_pool_client" "app_cognito_user_pool_client" {
@@ -168,7 +180,7 @@ tags = merge(var.common_tags, {
     Name = "${var.naming_prefix}-cloudfront"
 })
 }
-
+#####WAF
 resource "aws_wafv2_web_acl" "cf_web_acl" {
   name        = "cf-web-acl"
   description = "Basic WAF for CloudFront"
@@ -200,24 +212,42 @@ resource "aws_wafv2_web_acl" "cf_web_acl" {
     }
   }
 }
-data "aws_iam_policy_document" "s3_bucket_policy" {
-statement {
-    actions   = ["s3:GetObject"]
-    resources = ["aws_s3_bucket.s3-static-website.arn/*"]
-    principals {
-    type        = "Service"
-    identifiers = ["cloudfront.amazonaws.com"]
-    }
-    condition {
-    test     = "StringEquals"
-    variable = "AWS:SourceArn"
-    values   =  [aws_cloudfront_distribution.cf-dist.arn] 
-    }
-}
-}
+# data "aws_iam_policy_document" "s3_bucket_policy" {
+# statement {
+#     actions   = ["s3:GetObject"]
+#     resources = ["aws_s3_bucket.s3-static-website.arn/*"]
+#     principals {
+#     type        = "Service"
+#     identifiers = ["cloudfront.amazonaws.com"]
+#     }
+#     condition {
+#     test     = "StringEquals"
+#     variable = "AWS:SourceArn"
+#     values   =  [aws_cloudfront_distribution.cf-dist.arn] 
+#     }
+# }
+# }
 
 resource "aws_s3_bucket_policy" "static_site_bucket_policy" {
 bucket = aws_s3_bucket.s3-static-website.id
-policy = data.aws_iam_policy_document.s3_bucket_policy.json
+#policy = data.aws_iam_policy_document.s3_bucket_policy.json
+policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = "s3:GetObject"
+        Resource = "${aws_s3_bucket.s3-static-website.arn}/*"
+        Principal = {
+          Service = "cloudfront.amazonaws.com"
+        }
+        Condition = {
+          StringEquals = {
+            "AWS:SourceArn" = aws_cloudfront_distribution.cf-dist.arn
+          }
+        }
+      }
+    ]
+  })
 }
 
