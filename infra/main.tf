@@ -57,7 +57,7 @@ user_pool_id = aws_cognito_user_pool.app_cognito_user_pool.id
 
 resource "aws_cognito_user" "amplifier" {
 user_pool_id = aws_cognito_user_pool.app_cognito_user_pool.id
-username     = "email"
+username     = "charles.lyonga03@gmail.com"
 
 attributes = {
 terraform      = true
