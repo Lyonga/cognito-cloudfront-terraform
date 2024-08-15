@@ -1,13 +1,13 @@
 variable "bucket_name" {
   description = "The name of the S3 bucket."
   type        = string
-  default     = "my-static-website-bucket"
+  default     = "amplifier-demo-sandbox-bucket"
 }
 
 variable "naming_prefix" {
   description = "A prefix for naming resources."
   type        = string
-  default     = "myapp"
+  default     = "amplifier-app"
 }
 
 variable "common_tags" {

@@ -50,14 +50,14 @@ resource "aws_cognito_user_pool_client" "app_cognito_user_pool_client" {
 
 
 resource "aws_cognito_user_pool_domain" "app_cognito_user_pool_domain" {
-domain       = "app"
+domain       = "amplifier"
 user_pool_id = aws_cognito_user_pool.app_cognito_user_pool.id
 }
 
 
 resource "aws_cognito_user" "example" {
 user_pool_id = aws_cognito_user_pool.app_cognito_user_pool.id
-username     = "example"
+username     = "email"
 
 attributes = {
 terraform      = true
