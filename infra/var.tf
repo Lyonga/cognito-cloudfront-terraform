@@ -55,3 +55,27 @@ variable "nlb_arn" {
   type        = string
   default     = ""
 }
+
+variable "app_port" {
+  type = number
+  description = "Application port number"
+  default     = 80
+}
+
+variable "public_subnet_ids" {
+  type = list(string)
+  description = "IDs for private subnets"
+  default = [subnet-836b2f8d, subnet-fef97b98]
+}
+
+variable "vpc_id" {
+  type = string 
+  description = "The id for the VPC where the ECS container instance should be deployed"
+  default = "vpc-8f8856f2"
+}
+
+variable "environment" {
+  type = string
+  description = "amplifier tes environment"
+  default = "dev"
+}

@@ -75,7 +75,43 @@ resource "aws_api_gateway_integration_response" "proxy_integration_response" {
   }
 }
 
-# resource "aws_api_gateway_vpc_link" "amplifier_vpclink" {
-#   name = "vpc-link-${var.amplifier_vpclinkname}"
-#   target_arns = [var.nlb_arn]
-# }
+resource "aws_api_gateway_vpc_link" "amplifier_vpclink" {
+  name = "vpc-link-${var.amplifier_vpclinkname}"
+  target_arns = [aws_lb_target_group.nlb_tg.arn]
+}
+
+resource "aws_lb" "nlb" {
+  name               = "amplifier-nlb"
+  internal           = true
+  load_balancer_type = "network"
+  subnets            = [aws_subnet.public1.id, aws_subnet.public2.id]
+
+  enable_deletion_protection = false
+
+  tags = {
+    Environment = var.environment
+  }
+}
+
+resource "aws_lb_target_group" "nlb_tg" {
+  depends_on  = [
+    aws_lb.nlb
+  ]
+  name        = "nlb-ecs-${var.environment}-tg"
+  port        = var.app_port
+  protocol    = "TCP"
+  vpc_id      = var.vpc_id
+  target_type = "ip"
+}
+
+# Redirect all traffic from the NLB to the target group
+resource "aws_lb_listener" "nlb_listener" {
+  load_balancer_arn = aws_lb.nlb.id
+  port              = var.app_port
+  protocol    = "TCP"
+
+  default_action {
+    target_group_arn = aws_lb_target_group.nlb_tg.id
+    type             = "forward"
+  }
+}
