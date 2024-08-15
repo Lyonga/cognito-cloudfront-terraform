@@ -56,7 +56,7 @@ user_pool_id = aws_cognito_user_pool.app_cognito_user_pool.id
 
 
 resource "aws_cognito_user" "example" {
-user_pool_id = aws_cognito_user_pool.example.id
+user_pool_id = aws_cognito_user_pool.app_cognito_user_pool.id
 username     = "example"
 
 attributes = {
@@ -112,7 +112,7 @@ content_type = each.value
 
 
 data "aws_s3_bucket" "selected_bucket" {
-bucket = var.aws_s3_bucket.s3-static-website.id
+bucket = aws_s3_bucket.s3-static-website.id
 }
 
 # Create AWS Cloudfront distribution
