@@ -31,18 +31,18 @@ resource "aws_cognito_user_pool" "app_cognito_user_pool" {
       max_length = 256
     }
   }
-  schema {
-    attribute_data_type      = "String"
-    developer_only_attribute = false
-    mutable                  = true
-    name                     = "foo"
-    required                 = false
+  # schema {
+  #   attribute_data_type      = "String"
+  #   developer_only_attribute = false
+  #   mutable                  = true
+  #   name                     = "foo"
+  #   required                 = false
 
-    string_attribute_constraints {
-      min_length = 1
-      max_length = 256
-    }
-  }
+  #   string_attribute_constraints {
+  #     min_length = 1
+  #     max_length = 256
+  #   }
+  # }
 }
 
 resource "aws_cognito_user_pool_client" "app_cognito_user_pool_client" {
@@ -73,7 +73,7 @@ username     = "charles.lyonga03@gmail.com"
 
 attributes = {
 terraform      = true
-foo            = "bar"
+#foo            = "bar"
 email          = "charles.lyonga03@gmail.com"
 email_verified = true
 }
@@ -91,10 +91,10 @@ tags = merge(var.common_tags, {
 resource "aws_s3_bucket_public_access_block" "static_site_bucket_public_access" {
 bucket = aws_s3_bucket.s3-static-website.id
 
-block_public_acls       = true
-block_public_policy     = true
-ignore_public_acls      = true
-restrict_public_buckets = true
+block_public_acls       = false
+block_public_policy     = false
+ignore_public_acls      = false
+restrict_public_buckets = false
 }
 
 # S3 bucket static website configuration
