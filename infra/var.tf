@@ -105,11 +105,6 @@ variable "app_image" {
   description = "Container image to be used by the  application in task definition file"
 }
 
-variable "environment" {
-  type = string
-  description = "amplifier tes environment"
-}
-
 variable "fargate_cpu" {
   type = number
   description = "Fargate cpu allocation"
@@ -122,23 +117,23 @@ variable "fargate_memory" {
   default     = 1024
 }
 
-variable "app_port" {
-  type = number
-  description = "Application port number"
-  default     = 80
-}
+# variable "app_port" {
+#   type = number
+#   description = "Application port number"
+#   default     = 80
+# }
 
-variable "public_subnet_ids" {
-  type = list(string)
-  description = "IDs for private subnets"
-  default = []
-}
+# variable "public_subnet_ids" {
+#   type = list(string)
+#   description = "IDs for private subnets"
+#   default = []
+# }
 
-variable "vpc_id" {
-  type = string 
-  description = "The id for the VPC where the ECS container instance should be deployed"
-  default = "aws_vpc.custom_vpc.id"
-}
+# variable "vpc_id" {
+#   type = string 
+#   description = "The id for the VPC where the ECS container instance should be deployed"
+#   default = "aws_vpc.custom_vpc.id"
+# }
 
 variable "cluster_id" {
   type = string 
