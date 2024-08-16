@@ -58,7 +58,7 @@ variable "nlb_arn" {
 
 variable "app_port" {
   type = number
-  description = "Application port number"
+  description = "container port number"
   default     = 80
 }
 
