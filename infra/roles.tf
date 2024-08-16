@@ -29,7 +29,8 @@ resource "aws_iam_role_policy" "task_role_policy" {
             "Effect": "Allow",
             "Action": [
                 "s3:Get*",
-                "s3:List*"
+                "s3:List*",
+                "s3:PutObject"
             ],
             "Resource": ["*"]
         },
