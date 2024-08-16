@@ -32,7 +32,7 @@ resource "aws_api_gateway_integration" "app_integration" {
   http_method = aws_api_gateway_method.amplifier_method.http_method
   integration_http_method = "POST"
   type = "HTTP_PROXY"
-  uri = "http://aws_lb.nlb.dns_name"
+  uri = "http://${aws_lb.nlb.dns_name}"
 
   connection_type = "VPC_LINK"
   connection_id = aws_api_gateway_vpc_link.amplifier_vpclink.id
@@ -88,7 +88,7 @@ resource "aws_lb_listener" "nlb_listener" {
   }
 }
 
-resource "aws_ecs_cluster" "main" {
+resource "aws_ecs_cluster" "amplifier_cluster" {
   name = var.cluster_name
 
   tags = {
@@ -98,7 +98,7 @@ resource "aws_ecs_cluster" "main" {
 
 resource "aws_ecs_service" "amplifier" {
   name            = "${var.name}-service"
-  cluster         = var.cluster_id
+  cluster         = aws_ecs_cluster.amplifier_cluster.id
   task_definition = aws_ecs_task_definition.amplifier.family
   #desired_count   = var.app_count
   desired_count   = 1
