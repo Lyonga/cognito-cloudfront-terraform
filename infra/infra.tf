@@ -49,7 +49,7 @@ resource "aws_api_gateway_deployment" "dev" {
 
 resource "aws_api_gateway_vpc_link" "amplifier_vpclink" {
   name = "vpc-link-${var.amplifier_vpclinkname}"
-  target_arns = [aws_lb_target_group.nlb_tg.arn]
+  target_arns = [aws_lb.nlb.arn]
 }
 
 resource "aws_lb" "nlb" {
