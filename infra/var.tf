@@ -147,10 +147,10 @@ variable "app_count" {
   default = 1
 }
 
-variable "aws_security_group_ecs_tasks_id" {
-  type = string 
-  description = "The ID of the security group for the ECS tasks"
-}
+# variable "aws_security_group_ecs_tasks_id" {
+#   type = string 
+#   description = "The ID of the security group for the ECS tasks"
+# }
 
 variable "vpc_cidr_block" {
   type        = string
