@@ -114,7 +114,12 @@ resource "aws_iam_role_policy" "main_ecs_tasks" {
                 "events:PutTargets",
                 "events:DescribeRule",
                 "events:ListTargetsByRule",
-                "logs:DescribeLogGroups"  
+                "logs:DescribeLogGroups",
+                "ecs:DescribeServices",
+                "ecs:UpdateService",
+                "cloudwatch:DescribeAlarms",
+                "cloudwatch:PutMetricAlarm",
+
             ]
         },
         {
@@ -136,4 +141,18 @@ EOF
 resource "aws_iam_role_policy_attachment" "main_ecs_tasks_ecs_policy" {
   role       = aws_iam_role.main_ecs_tasks.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
+}
+resource "aws_iam_role_policy_attachment" "main_ecs_tasks_ecs_policy_three" {
+  role       = aws_iam_role.main_ecs_tasks.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceRole"
+}
+
+resource "aws_iam_role_policy_attachment" "main_ecs_tasks_ecs_policy_two" {
+  role       = aws_iam_role.main_ecs_tasks.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role"
+}
+
+resource "aws_iam_role_policy_attachment" "main_ecs_tasks_ecs_policy_0ne" {
+  role       = aws_iam_role.main_ecs_tasks.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceEventsRole"
 }
