@@ -65,13 +65,15 @@ variable "app_port" {
 variable "public_subnet_ids" {
   type = list(string)
   description = "IDs for public subnets"
-  default = ["subnet-836b2f8d", "subnet-fef97b98"]
+  #default = ["subnet-836b2f8d", "subnet-fef97b98"]
+  default = ["subnet-04709b8abcff0619c", "subnet-004e20dfb346cc2d1"]
 }
 
 variable "vpc_id" {
   type = string 
   description = "The id for the VPC where the ECS container instance should be deployed"
-  default = "vpc-8f8856f2"
+  #default = "vpc-8f8856f2"
+  default = "vpc-0153fb116515b97e2"
 }
 
 variable "environment" {

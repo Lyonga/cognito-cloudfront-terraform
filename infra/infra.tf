@@ -56,7 +56,8 @@ resource "aws_lb" "nlb" {
   name               = "amplifier-nlb"
   internal           = true
   load_balancer_type = "network"
-  subnets            = ["subnet-836b2f8d", "subnet-fef97b98"]
+  #subnets            = ["subnet-836b2f8d", "subnet-fef97b98"]
+  subnets            = ["subnet-04709b8abcff0619c", "subnet-004e20dfb346cc2d1"]
 
   enable_deletion_protection = false
 
