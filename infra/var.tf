@@ -112,12 +112,6 @@ variable "fargate_memory" {
   default     = 1024
 }
 
-variable "cluster_id" {
-  type = string 
-  description = "Cluster ID"
-  default = ""
-}
-
 variable "app_count" {
   type = number 
   description = "The number of instances of the task definition to place and keep running."

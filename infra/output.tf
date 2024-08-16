@@ -14,9 +14,9 @@ output "cloudfront_distribution_arn" {
 }
 
 output arn {
-  value = aws_ecs_cluster.main.arn
+  value = aws_ecs_cluster.amplifier_cluster.arn
 }
 
 output id {
-  value = aws_ecs_cluster.main.id
+  value = aws_ecs_cluster.amplifier_cluster.id
 }
