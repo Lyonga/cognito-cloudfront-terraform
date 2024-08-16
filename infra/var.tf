@@ -100,10 +100,10 @@ variable "name" {
   default     = "amplifier-task"
 }
 
-variable "app_image" {
-  type = string 
-  description = "Container image to be used by the  application in task definition file"
-}
+# variable "app_image" {
+#   type = string 
+#   description = "Container image to be used by the  application in task definition file"
+# }
 
 variable "fargate_cpu" {
   type = number
