@@ -119,6 +119,16 @@ resource "aws_iam_role_policy" "main_ecs_tasks" {
                 "ecs:UpdateService",
                 "cloudwatch:DescribeAlarms",
                 "cloudwatch:PutMetricAlarm",
+                "ecs:RunTask",
+                "ec2:AuthorizeSecurityGroupIngress",
+                "ec2:Describe*",
+                "elasticloadbalancing:DeregisterInstancesFromLoadBalancer",
+                "elasticloadbalancing:DeregisterTargets",
+                "elasticloadbalancing:Describe*",
+                "elasticloadbalancing:RegisterInstancesWithLoadBalancer",
+                "elasticloadbalancing:RegisterTargets"
+
+
 
             ]
         },
@@ -131,6 +141,64 @@ resource "aws_iam_role_policy" "main_ecs_tasks" {
             "Resource": [
                 "*"
             ]
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "ec2:DescribeTags",
+                "ecs:CreateCluster",
+                "ecs:DeregisterContainerInstance",
+                "ecs:DiscoverPollEndpoint",
+                "ecs:Poll",
+                "ecs:RegisterContainerInstance",
+                "ecs:StartTelemetrySession",
+                "ecs:UpdateContainerInstancesState",
+                "ecs:Submit*",
+                "ecr:GetAuthorizationToken",
+                "ecr:BatchCheckLayerAvailability",
+                "ecr:GetDownloadUrlForLayer",
+                "ecr:BatchGetImage",
+                "logs:CreateLogStream",
+                "logs:PutLogEvents"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": "ecs:TagResource",
+            "Resource": "*",
+            "Condition": {
+                "StringEquals": {
+                    "ecs:CreateAction": [
+                        "CreateCluster",
+                        "RegisterContainerInstance"
+                    ]
+                }
+            }
+        },
+        {
+            "Effect": "Allow",
+            "Action": "iam:PassRole",
+            "Resource": [
+                "*"
+            ],
+            "Condition": {
+                "StringLike": {
+                    "iam:PassedToService": "ecs-tasks.amazonaws.com"
+                }
+            }
+        },
+        {
+            "Effect": "Allow",
+            "Action": "ecs:TagResource",
+            "Resource": "*",
+            "Condition": {
+                "StringEquals": {
+                    "ecs:CreateAction": [
+                        "RunTask"
+                    ]
+                }
+            }
         }
     ]
 
@@ -142,17 +210,17 @@ resource "aws_iam_role_policy_attachment" "main_ecs_tasks_ecs_policy" {
   role       = aws_iam_role.main_ecs_tasks.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
 }
-resource "aws_iam_role_policy_attachment" "main_ecs_tasks_ecs_policy_three" {
-  role       = aws_iam_role.main_ecs_tasks.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceRole"
-}
+# resource "aws_iam_role_policy_attachment" "main_ecs_tasks_ecs_policy_three" {
+#   role       = aws_iam_role.main_ecs_tasks.name
+#   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceRole"
+# }
 
-resource "aws_iam_role_policy_attachment" "main_ecs_tasks_ecs_policy_two" {
-  role       = aws_iam_role.main_ecs_tasks.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role"
-}
+# resource "aws_iam_role_policy_attachment" "main_ecs_tasks_ecs_policy_two" {
+#   role       = aws_iam_role.main_ecs_tasks.name
+#   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role"
+# }
 
-resource "aws_iam_role_policy_attachment" "main_ecs_tasks_ecs_policy_0ne" {
-  role       = aws_iam_role.main_ecs_tasks.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceEventsRole"
-}
+# resource "aws_iam_role_policy_attachment" "main_ecs_tasks_ecs_policy_0ne" {
+#   role       = aws_iam_role.main_ecs_tasks.name
+#   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceEventsRole"
+# }
