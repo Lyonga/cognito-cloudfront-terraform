@@ -56,6 +56,11 @@ resource "aws_iam_role_policy" "task_role_policy" {
 EOF
 }
 
+resource "aws_iam_role_policy_attachment" "task_role_ecs_policy" {
+  role       = aws_iam_role.task_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
+}
+
 resource "aws_iam_role" "main_ecs_tasks" {
   name = "main_ecs_tasks-${var.name}-role"
   assume_role_policy = <<EOF
@@ -111,4 +116,9 @@ resource "aws_iam_role_policy" "main_ecs_tasks" {
 
 }
 EOF
+}
+
+resource "aws_iam_role_policy_attachment" "main_ecs_tasks_ecs_policy" {
+  role       = aws_iam_role.main_ecs_tasks.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
 }
