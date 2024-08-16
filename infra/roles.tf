@@ -109,7 +109,22 @@ resource "aws_iam_role_policy" "main_ecs_tasks" {
                 "logs:CreateLogStream",
                 "logs:PutLogEvents",
                 "logs:CreateLogGroup",
-                "logs:DescribeLogStreams"
+                "logs:DescribeLogStreams",
+                "events:PutRule",
+                "events:PutTargets",
+                "events:DescribeRule",
+                "events:ListTargetsByRule",
+                "logs:DescribeLogGroups"  
+            ]
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "kms:Decrypt",
+                "secretsmanager:GetSecretValue"
+            ],
+            "Resource": [
+                "*"
             ]
         }
     ]
