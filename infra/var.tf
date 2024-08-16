@@ -64,7 +64,7 @@ variable "app_port" {
 
 variable "public_subnet_ids" {
   type = list(string)
-  description = "IDs for public subnets t"
+  description = "IDs for public subnets test"
   #default = ["subnet-836b2f8d", "subnet-fef97b98"]
   default = ["subnet-04709b8abcff0619c", "subnet-004e20dfb346cc2d1"]
 }
