@@ -131,7 +131,7 @@ resource "aws_ecs_service" "amplifier" {
 
   network_configuration {
     security_groups = [aws_security_group.ecs_tasks.id]
-    subnets         = [aws_subnet.public1.id, aws_subnet.public2.id]
+    subnets         = var.public_subnet_ids
   }
 
   load_balancer {
@@ -144,11 +144,11 @@ resource "aws_ecs_service" "amplifier" {
     aws_ecs_task_definition.amplifier,
   ]
 
-  service_registries {
-    registry_arn   = aws_service_discovery_service.amplifier.arn
-    container_name = "amplifier"
+  # service_registries {
+  #   registry_arn   = aws_service_discovery_service.amplifier.arn
+  #   container_name = "amplifier"
 
-  }
+  # }
 }
 
 resource "aws_ecs_task_definition" "amplifier" {
