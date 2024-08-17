@@ -44,7 +44,6 @@ resource "aws_iam_role_policy" "task_role_policy" {
                 "ecr:BatchCheckLayerAvailability",
                 "ecr:GetDownloadUrlForLayer",
                 "ecr:BatchGetImage",
-                "logs:CreateLogStream",
                 "logs:PutLogEvents",
                 "logs:CreateLogGroup",
                 "logs:DescribeLogStreams"
@@ -109,6 +108,8 @@ resource "aws_iam_role_policy" "main_ecs_tasks" {
                 "logs:CreateLogStream",
                 "logs:PutLogEvents",
                 "logs:CreateLogGroup",
+                "logs:DescribeLogStreams",
+                "logs:DescribeLogGroups", 
                 "logs:DescribeLogStreams",
                 "events:PutRule",
                 "events:PutTargets",
@@ -206,21 +207,7 @@ resource "aws_iam_role_policy" "main_ecs_tasks" {
 EOF
 }
 
-resource "aws_iam_role_policy_attachment" "main_ecs_tasks_ecs_policy" {
-  role       = aws_iam_role.main_ecs_tasks.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
-}
-# resource "aws_iam_role_policy_attachment" "main_ecs_tasks_ecs_policy_three" {
+# resource "aws_iam_role_policy_attachment" "main_ecs_tasks_ecs_policy" {
 #   role       = aws_iam_role.main_ecs_tasks.name
-#   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceRole"
-# }
-
-# resource "aws_iam_role_policy_attachment" "main_ecs_tasks_ecs_policy_two" {
-#   role       = aws_iam_role.main_ecs_tasks.name
-#   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role"
-# }
-
-# resource "aws_iam_role_policy_attachment" "main_ecs_tasks_ecs_policy_0ne" {
-#   role       = aws_iam_role.main_ecs_tasks.name
-#   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceEventsRole"
+#   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
 # }
