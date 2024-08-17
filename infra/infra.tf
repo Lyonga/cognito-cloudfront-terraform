@@ -109,11 +109,11 @@ resource "aws_ecs_service" "amplifier" {
     subnets         = var.public_subnet_ids
   }
 
-  load_balancer {
-    target_group_arn = aws_lb_target_group.nlb_tg.arn
-    container_name   = var.name
-    container_port   = var.app_port
-  }
+  # load_balancer {
+  #   target_group_arn = aws_lb_target_group.nlb_tg.arn
+  #   container_name   = var.name
+  #   container_port   = var.app_port
+  # }
 
   depends_on = [
     aws_ecs_task_definition.amplifier,
