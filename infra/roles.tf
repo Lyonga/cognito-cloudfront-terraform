@@ -207,7 +207,7 @@ resource "aws_iam_role_policy" "main_ecs_tasks" {
 EOF
 }
 
-# resource "aws_iam_role_policy_attachment" "main_ecs_tasks_ecs_policy" {
-#   role       = aws_iam_role.main_ecs_tasks.name
-#   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
-# }
+resource "aws_iam_role_policy_attachment" "main_ecs_tasks_ecs_policy" {
+  role       = aws_iam_role.main_ecs_tasks.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
+}
