@@ -106,6 +106,7 @@ resource "aws_ecs_service" "amplifier" {
 
   network_configuration {
     security_groups = [aws_security_group.ecs_tasks.id]
+    assign_public_ip = true
     subnets         = var.public_subnet_ids
   }
 
