@@ -78,7 +78,7 @@ resource "aws_lb_target_group" "nlb_tg" {
 
   health_check {
     path                = "/health"  # Health check path
-    protocol            = "HTTP"
+    protocol            = "TCP"
     port                = "traffic-port"
     healthy_threshold   = 2
     unhealthy_threshold = 10
