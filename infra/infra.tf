@@ -72,7 +72,7 @@ resource "aws_lb_target_group" "nlb_tg" {
   ]
   name        = "nlb-ecs-${var.environment}-tg"
   port        = var.app_port
-  protocol    = "TPC"
+  protocol    = "TCP"
   vpc_id      = var.vpc_id
   target_type = "ip"
 
