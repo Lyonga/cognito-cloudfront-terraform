@@ -90,7 +90,7 @@ variable "cluster_name" {
 
 variable "cluster_tag_name" {
   type        = string
-  description = "Name tag for the cluster"
+  description = "Name tag for the clusters demo"
   default     = "amplifier-cluster"
 }
 
