@@ -72,16 +72,27 @@ resource "aws_lb_target_group" "nlb_tg" {
   ]
   name        = "nlb-ecs-${var.environment}-tg"
   port        = var.app_port
-  protocol    = "TCP"
+  protocol    = "HTTP"
   vpc_id      = var.vpc_id
   target_type = "ip"
+
+  health_check {
+    path                = "/dev/health"  # Health check path
+    protocol            = "HTTP"
+    port                = "traffic-port"
+    healthy_threshold   = 2
+    unhealthy_threshold = 10
+    timeout             = 10
+    interval            = 30
+    matcher             = "200"
+  }
 }
 
 # Redirect all traffic from the NLB to the target group
 resource "aws_lb_listener" "nlb_listener" {
   load_balancer_arn = aws_lb.nlb.id
   port              = var.app_port
-  protocol    = "TCP"
+  protocol    = "HTTP"
 
   default_action {
     target_group_arn = aws_lb_target_group.nlb_tg.id
