@@ -165,6 +165,7 @@ resource "aws_ecs_task_definition" "amplifier" {
     {
       name        = var.name
       image       = "612958166077.dkr.ecr.us-east-1.amazonaws.com/test:latest"
+      #image: "${JFROG_REGISTRY_URL}/test:latest",
       cpu         = var.fargate_cpu
       memory      = var.fargate_memory
       networkMode = "awsvpc"
