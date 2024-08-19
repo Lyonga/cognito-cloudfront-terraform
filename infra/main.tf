@@ -85,7 +85,7 @@ resource "aws_cognito_user" "amplifier_users" {
 
 # S3 static website bucket
 resource "aws_s3_bucket" "s3-static-website" {
-bucket = var.bucket_name
+bucket = "${var.bucket_name}-front-web"
 tags = merge(var.common_tags, {
     Name = "${var.naming_prefix}-s3-bucket"
 })
@@ -240,7 +240,7 @@ policy = jsonencode({
 
 ################################
 resource "aws_s3_bucket" "amplifier_media_bucket" {
-bucket = "${var.bucket_name}-amplifier_media_bucket"
+bucket = "${var.bucket_name}-amplifier-media-bucket"
 tags = merge(var.common_tags, {
     Name = "${var.naming_prefix}-s3-bucket"
 })
