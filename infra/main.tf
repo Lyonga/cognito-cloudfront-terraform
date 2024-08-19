@@ -237,3 +237,64 @@ policy = jsonencode({
     ]
   })
 }
+
+################################
+resource "aws_s3_bucket" "amplifier_media_bucket" {
+bucket = "${var.bucket_name}-amplifier_media_bucket"
+tags = merge(var.common_tags, {
+    Name = "${var.naming_prefix}-s3-bucket"
+})
+}
+
+# S3 public access settings
+resource "aws_s3_bucket_public_access_block" "amplifier_media_bucket_public_access" {
+bucket = aws_s3_bucket.amplifier_media_bucket.id
+block_public_acls       = false
+block_public_policy     = false
+ignore_public_acls      = false
+restrict_public_buckets = false
+}
+
+# CORS configuration for S3 Bucket
+resource "aws_s3_bucket_cors_configuration" "amplifier_media_bucket_cors" {
+  bucket = aws_s3_bucket.amplifier_media_bucket.id
+
+  cors_rule {
+    allowed_headers = ["*"]
+    allowed_methods = ["GET", "HEAD", "PUT", "POST", "DELETE"]
+    allowed_origins = ["https://${aws_cloudfront_distribution.cf-dist.domain_name}"]
+    expose_headers  = ["ETag"]
+    max_age_seconds = 3000
+  }
+}
+
+# S3 Bucket Policy to allow CloudFront to access the media bucket
+resource "aws_s3_bucket_policy" "amplifier_media_bucket_policy" {
+  bucket = aws_s3_bucket.amplifier_media_bucket.id
+
+  policy = <<EOF
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Principal": {
+                "Service": "cloudfront.amazonaws.com"
+            },
+            "Action": "s3:GetObject",
+            "Resource": "arn:aws:s3:::${aws_s3_bucket.amplifier_media_bucket.id}/*",
+            "Condition": {
+                "StringEquals": {
+                    "AWS:SourceArn": "${aws_cloudfront_distribution.cf-dist.arn}"
+                }
+            }
+        }
+    ]
+}
+EOF
+}
+
+# resource "aws_cloudwatch_log_group" "ecs_log_group" {
+#   name              = "/ecs/amplifier/awslog"
+#   retention_in_days = 7 # Adjust the retention period as needed
+# }
