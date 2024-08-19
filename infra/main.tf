@@ -249,10 +249,10 @@ tags = merge(var.common_tags, {
 # S3 public access settings
 resource "aws_s3_bucket_public_access_block" "amplifier_media_bucket_public_access" {
 bucket = aws_s3_bucket.amplifier_media_bucket.id
-block_public_acls       = false
-block_public_policy     = false
-ignore_public_acls      = false
-restrict_public_buckets = false
+block_public_acls       = true
+block_public_policy     = true
+ignore_public_acls      = true
+restrict_public_buckets = true
 }
 
 # CORS configuration for S3 Bucket
