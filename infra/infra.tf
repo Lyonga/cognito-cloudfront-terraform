@@ -1,6 +1,6 @@
 resource "aws_api_gateway_rest_api" "amplifier" {
   name = "amplifier-api"
-  description = "API Gateway for amplifier application"
+  description = "API Gateway for test amplifier application"
 }
 
 # resource "aws_api_gateway_authorizer" "cognito_auth" {
@@ -21,8 +21,6 @@ resource "aws_api_gateway_method" "amplifier_method" {
   rest_api_id = aws_api_gateway_rest_api.amplifier.id
   resource_id = aws_api_gateway_resource.amplifier_resource.id
   http_method = "ANY" # This allows all HTTP methods (GET, POST, PUT, DELETE, etc.)
-  # authorization = "COGNITO_USER_POOLS"
-  # authorizer_id = aws_api_gateway_authorizer.cognito_auth.id
   authorization = "NONE"
   api_key_required = true  # Requires API key for access
 }
@@ -79,7 +77,6 @@ resource "aws_lb" "nlb" {
   name               = "amplifier-nlb"
   internal           = true
   load_balancer_type = "network"
-  #subnets            = ["subnet-836b2f8d", "subnet-fef97b98"]
   subnets            = ["subnet-04709b8abcff0619c", "subnet-004e20dfb346cc2d1"]
 
   enable_deletion_protection = false
