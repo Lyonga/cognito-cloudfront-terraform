@@ -3,13 +3,13 @@ resource "aws_api_gateway_rest_api" "amplifier" {
   description = "API Gateway for amplifier application"
 }
 
-resource "aws_api_gateway_authorizer" "cognito_auth" {
-  rest_api_id = aws_api_gateway_rest_api.amplifier.id
-  type  = "COGNITO_USER_POOLS"
-  identity_source = "method.request.header.Authorization"
-  name             = "cognito-amplifier-authorizer"
-  #Sprovider_arns    = [aws_cognito_user_pool.amplifier_cognito_user_pool.arn]
-}
+# resource "aws_api_gateway_authorizer" "cognito_auth" {
+#   rest_api_id = aws_api_gateway_rest_api.amplifier.id
+#   type  = "COGNITO_USER_POOLS"
+#   identity_source = "method.request.header.Authorization"
+#   name             = "cognito-amplifier-authorizer"
+#   #Sprovider_arns    = [aws_cognito_user_pool.amplifier_cognito_user_pool.arn]
+# }
 
 resource "aws_api_gateway_resource" "amplifier_resource" {
   rest_api_id = aws_api_gateway_rest_api.amplifier.id
@@ -21,8 +21,10 @@ resource "aws_api_gateway_method" "amplifier_method" {
   rest_api_id = aws_api_gateway_rest_api.amplifier.id
   resource_id = aws_api_gateway_resource.amplifier_resource.id
   http_method = "ANY" # This allows all HTTP methods (GET, POST, PUT, DELETE, etc.)
-  authorization = "COGNITO_USER_POOLS"
-  authorizer_id = aws_api_gateway_authorizer.cognito_auth.id
+  # authorization = "COGNITO_USER_POOLS"
+  # authorizer_id = aws_api_gateway_authorizer.cognito_auth.id
+  authorization = "NONE"
+  api_key_required = true  # Requires API key for access
 }
 
 # Integration with NLB via VPC Link
@@ -45,6 +47,30 @@ resource "aws_api_gateway_deployment" "dev" {
     aws_api_gateway_integration.app_integration,
     aws_api_gateway_method.amplifier_method
   ]
+}
+resource "aws_api_gateway_usage_plan" "amplifier_usage_plan" {
+  name = "amplifier-usage-plan"
+  api_stages {
+    api_id = aws_api_gateway_rest_api.amplifier.id
+    stage  = aws_api_gateway_deployment.dev.stage_name
+  }
+}
+
+resource "aws_api_gateway_api_key" "amplifier_api_key" {
+  name        = "amplifier-api-key"
+  description = "API Key for amplifier application"
+  enabled     = true
+  stage_key {
+    rest_api_id = aws_api_gateway_rest_api.amplifier.id
+    stage_name  = aws_api_gateway_deployment.dev.stage_name
+  }
+}
+
+# Associate the API Key with the Usage Plan
+resource "aws_api_gateway_usage_plan_key" "amplifier_usage_plan_key" {
+  key_id        = aws_api_gateway_api_key.amplifier_api_key.id
+  key_type      = "API_KEY"
+  usage_plan_id = aws_api_gateway_usage_plan.amplifier_usage_plan.id
 }
 
 resource "aws_api_gateway_vpc_link" "amplifier_vpclink" {
