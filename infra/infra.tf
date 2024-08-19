@@ -56,14 +56,11 @@ resource "aws_api_gateway_usage_plan" "amplifier_usage_plan" {
   }
 }
 
+ ######API Gateway API Key
 resource "aws_api_gateway_api_key" "amplifier_api_key" {
   name        = "amplifier-api-key"
   description = "API Key for amplifier application"
   enabled     = true
-  stage_key {
-    rest_api_id = aws_api_gateway_rest_api.amplifier.id
-    stage_name  = aws_api_gateway_deployment.dev.stage_name
-  }
 }
 
 # Associate the API Key with the Usage Plan
