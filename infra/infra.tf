@@ -8,7 +8,7 @@ resource "aws_api_gateway_authorizer" "cognito_auth" {
   type  = "COGNITO_USER_POOLS"
   identity_source = "method.request.header.Authorization"
   name             = "cognito-amplifier-authorizer"
-  provider_arns    = [aws_cognito_user_pool.amplifier_cognito_user_pool.arn]
+  #Sprovider_arns    = [aws_cognito_user_pool.amplifier_cognito_user_pool.arn]
 }
 
 resource "aws_api_gateway_resource" "amplifier_resource" {
