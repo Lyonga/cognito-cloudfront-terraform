@@ -148,3 +148,13 @@ variable "security_group_ecs_tasks_name" {
   default     = "ecs-tasks-sg"
   description = "ECS Tasks security group name"
 }
+
+variable "cognito_id_policy_name" {
+  type        = string
+  default     = "Cognito_amplifier_authenticated_role_policy"
+}
+
+variable "cognito_id_role_name" {
+  type        = string
+  default     = "Cognito_amplifier_authenticated_role_role"
+}

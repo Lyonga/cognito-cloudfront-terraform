@@ -18,7 +18,7 @@ EOF
 }
 
 resource "aws_iam_role_policy" "task_role_policy" {
-  name = "ecs_tasks-${var.name}-policy"
+  name = "ecs_tasks-${var.name}-poc-policy"
   role = aws_iam_role.task_role.id
 
   policy = <<EOF
@@ -48,7 +48,49 @@ resource "aws_iam_role_policy" "task_role_policy" {
                 "logs:CreateLogGroup",
                 "logs:DescribeLogStreams"
             ]
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "kms:Decrypt",
+                "secretsmanager:GetSecretValue"
+            ],
+            "Resource": [
+                "*"
+            ]
+        },
+        {
+            "Action": [
+                "ssmmessages:CreateControlChannel",
+                "ssmmessages:CreateDataChannel",
+                "ssmmessages:OpenControlChannel",
+                "ssmmessages:OpenDataChannel"
+            ],
+            "Effect": "Allow",
+            "Resource": "*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "bedrock:InvokeModel",
+                "bedrock:ListFoundationModels"
+            ],
+            "Resource": [
+                "arn:aws:bedrock:*::foundation-model/anthropic.claude-3-sonnet-*",
+                "arn:aws:bedrock:us-east-1::foundation-model/anthropic.claude-*",
+                "arn:aws:bedrock:us-east-1::foundation-model/anthropic.claude-3-haiku-*",
+                "arn:aws:bedrock:us-east-1::foundation-model/cohere.command-*"
+            ]
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "rds-db:connect",
+                "rds:Describe*"
+            ],
+            "Resource": "*"
         }
+
     ]
 
 }
