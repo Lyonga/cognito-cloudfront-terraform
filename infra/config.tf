@@ -5,7 +5,13 @@ resource "aws_config_config_rule" "non_approved_ami" {
   source {
     owner             = "CUSTOM_LAMBDA"
     source_identifier = aws_lambda_function.check_ami.arn  # Reference to your Lambda function
+
+    source_details {
+      event_source = "aws.config"
+      message_type = "ConfigurationItemChangeNotification"  # Valid type for CUSTOM_LAMBDA
+    }
   }
+  
 
   input_parameters = jsonencode({
     "approved_ami_list" = ["ami-12345678", "ami-87654321"]  # Your approved AMI IDs
