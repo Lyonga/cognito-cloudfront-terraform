@@ -46,6 +46,14 @@ resource "aws_lambda_function" "check_ami" {
   }
 }
 
+# Add permission for AWS Config to invoke the Lambda function
+resource "aws_lambda_permission" "allow_config_invoke" {
+  statement_id  = "AllowInvokeByConfig"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.check_ami.function_name
+  principal     = "config.amazonaws.com"   # AWS Config is the principal that will invoke the Lambda
+}
+
 # IAM Role for Lambda
 resource "aws_iam_role" "lambda_exec" {
   name = "lambda_terminate_ec2_role"
