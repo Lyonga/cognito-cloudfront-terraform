@@ -134,7 +134,7 @@ variable "private_subnet_cidr_blocks" {
 variable "security_group_lb_name" {
   type        = string
   default     = "alb-sg"
-  description = "Load Balancer security group name"
+  description = "Load Balancer security group name test"
 }
 
 variable "security_group_lb_description" {
