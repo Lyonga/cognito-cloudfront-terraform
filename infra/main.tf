@@ -55,8 +55,8 @@ resource "aws_cognito_user_pool_client" "amplifiercognito_user_pool_client" {
 }
 
 
-resource "aws_cognito_user_pool_domain" "app_cognito_user_pool_domain" {
-domain       = "amplifier"
+resource "aws_cognito_user_pool_domain" "demo_cognito_user_pool_domain" {
+domain       = "demo-amplifier"
 user_pool_id = aws_cognito_user_pool.amplifier_cognito_user_pool.id
 }
 

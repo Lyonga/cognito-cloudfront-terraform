@@ -1,17 +1,22 @@
 resource "aws_config_config_rule" "non_approved_ami" {
   name        = "non-approved-ami-rule"
   description = "Check if EC2 instances are launched using non-approved AMIs."
+
   source {
     owner             = "CUSTOM_LAMBDA"
-    source_identifier = aws_lambda_function.check_ami.arn
+    source_identifier = aws_lambda_function.check_ami.arn  # Reference to your Lambda function
   }
+
   input_parameters = jsonencode({
-    "approved_ami_list" = ["ami-12345678", "ami-87654321"]  # Approved AMI IDs
+    "approved_ami_list" = ["ami-12345678", "ami-87654321"]  # Your approved AMI IDs
   })
+
   scope {
     compliance_resource_types = ["AWS::EC2::Instance"]
   }
 }
+
+
 
 # Archive the Python file into a zip
 data "archive_file" "lambda_package" {

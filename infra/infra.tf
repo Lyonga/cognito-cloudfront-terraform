@@ -31,7 +31,7 @@ resource "aws_api_gateway_integration" "app_integration" {
 
   connection_type = "VPC_LINK"
   connection_id = aws_api_gateway_vpc_link.amplifier_vpclink.id
-  timeout_milliseconds = 180000
+  timeout_milliseconds = 29000
   cache_key_parameters = ["method.request.path.proxy"]
   request_parameters = {
     "integration.request.path.proxy" = "method.request.path.proxy"
