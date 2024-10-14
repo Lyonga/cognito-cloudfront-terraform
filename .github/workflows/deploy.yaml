@@ -25,6 +25,13 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION}}
 
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1.7.0
+        with:
+          role-to-assume: ${{ secrets.ROLE_ARN }}
+          role-session-name: github-actions-for-deployments-lyonga-pipeline-org-role
+          aws-region: ${{ secrets.AWS_REGION}}
+
       - name: Install Terraform
         uses: hashicorp/setup-terraform@v1
 
