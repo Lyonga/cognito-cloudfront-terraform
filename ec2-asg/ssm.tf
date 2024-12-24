@@ -1,5 +1,6 @@
 # Terraform Configuration for Agent Installation using SSM and EventBridge
 # Retrieve Falcon Client ID from Parameter Store
+data "aws_region" "current" {}
 data "aws_ssm_parameter" "falcon_client_id" {
   name            = var.falcon_client_id_parameter_name
   with_decryption = true

@@ -143,17 +143,25 @@ resource "aws_launch_template" "ec2_instance_launch_template" {
   iam_instance_profile {
     name = aws_iam_instance_profile.ec2_instance_profile.name
   }
-
-
   user_data = base64encode(<<EOT
-<script>
-powershell -Command "C:\'Program Files'\Amazon\AmazonCloudWatchAgent\amazon-cloudwatch-agent-ctl.ps1 -a fetch-config -m ec2 -c ssm:${var.ssm_key} -s"
-cfn-init.exe -v --stack ${var.stack_id} --resource EC2InstanceLaunchTemplate --region ${var.region} --configsets default
-powershell -Command "Start-Sleep -Seconds 30"
-cfn-signal.exe -e %errorlevel% --stack ${var.stack_id} --resource AutoScalingGroup --region ${var.region}
-</script>
-EOT
-  )
+    <script>
+    powershell -Command "C:\'Program Files'\Amazon\AmazonCloudWatchAgent\amazon-cloudwatch-agent-ctl.ps1 -a fetch-config -m ec2 -c ssm:${var.ssm_key} -s"
+    powershell -Command "Start-Sleep -Seconds 30"
+    </script>
+    EOT
+    )
+
+
+
+#   user_data = base64encode(<<EOT
+#     <script>
+#     powershell -Command "C:\'Program Files'\Amazon\AmazonCloudWatchAgent\amazon-cloudwatch-agent-ctl.ps1 -a fetch-config -m ec2 -c ssm:${var.ssm_key} -s"
+#     cfn-init.exe -v --stack ${var.stack_id} --resource EC2InstanceLaunchTemplate --region ${var.region} --configsets default
+#     powershell -Command "Start-Sleep -Seconds 30"
+#     cfn-signal.exe -e %errorlevel% --stack ${var.stack_id} --resource AutoScalingGroup --region ${var.region}
+#     </script>
+#     EOT
+#     )
 
   tag_specifications {
     resource_type = "instance"
@@ -264,7 +272,7 @@ resource "aws_ssm_association" "domain_join" {
 
   targets {
     key    = "InstanceIds"
-    values = [aws_instance.ec2_instance.id]
+    values = [aws_instance.generic.id]
   }
 
   parameters = {
@@ -352,7 +360,7 @@ resource "aws_autoscaling_policy" "cluster_cpu_policy" {
   name                  = "${var.stack_name}-scaling-out-Policy"
   policy_type           = "TargetTrackingScaling"
   adjustment_type       = "ChangeInCapacity"
-  autoscaling_group_name = aws_autoscaling_group.asg[0].name
+  autoscaling_group_name = aws_autoscaling_group.ec2_asg.name
 
   target_tracking_configuration {
     predefined_metric_specification {
@@ -366,7 +374,7 @@ resource "aws_autoscaling_policy" "scaling_policy" {
   name                  = "${var.stack_name}-scaling-in-Policy"
   adjustment_type       = "ChangeInCapacity"
   scaling_adjustment    = 1
-  autoscaling_group_name = aws_autoscaling_group.asg[0].name
+  autoscaling_group_name = aws_autoscaling_group.ec2_asg.name
 }
 
 resource "aws_cloudwatch_metric_alarm" "cpu_high_alarm" {
@@ -431,12 +439,12 @@ resource "aws_security_group" "web_server" {
 }
 
 resource "aws_lb" "alb" {
-  name               = "NGL-AAE2-IP-VSA01CloudFormationALB"
+  name               = "ngl-test-alb"
   internal           = true
   load_balancer_type = "application"
   security_groups    = [aws_security_group.web_server.id]
   #subnets            = var.subnet_ids
-  subnets            = [var.subnet1, var.subnet2]
+  subnets = length(var.subnet_ids) > 0 ? var.subnet_ids : [var.subnet1, var.subnet2]
 
   tags = merge(
     {
@@ -447,7 +455,7 @@ resource "aws_lb" "alb" {
 }
 
 resource "aws_lb_target_group" "ec2_target_group" {
-  name        = "NGL-AAE2-IP-VSA01CloudFormationTG"
+  name        = "ngl-test-alb-trp"
   port        = 80
   protocol    = "HTTP"
   vpc_id      = var.vpc_id
@@ -641,7 +649,7 @@ resource "aws_efs_file_system" "ds_efs_file_system" {
 
 #--mount target
 resource "aws_efs_mount_target" "efs_mount_target" {
-  count   = var.subnet_ids
+  count = length(var.subnet_ids)
   file_system_id  = aws_efs_file_system.ds_efs_file_system.id
   subnet_id       = var.efs_mount_target_subnet_ids[count.index]
   #ip_address      = var.efs_mount_target_ip_address
