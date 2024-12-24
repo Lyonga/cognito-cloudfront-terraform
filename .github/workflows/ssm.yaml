@@ -5,52 +5,34 @@ on:
     branches: [ main ]
     paths:
       - "ec2-asg/**"
+
 jobs:
 
   build:
-
-    name: install Terraform and deploy
+    name: Install Terraform and deploy
     runs-on: ubuntu-latest
 
     permissions:
       id-token: write
       contents: read
 
-
     steps:
-
       - name: Check out code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
-    #   - name: Configure AWS credentials
-    #     uses: aws-actions/configure-aws-credentials@v1
-    #     with:
-    #       aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-    #       aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-    #       aws-region: ${{ secrets.AWS_REGION}}
+      - name: Debug OIDC Token
+        run: echo $ACTIONS_ID_TOKEN_REQUEST_URL
 
       - name: Configure AWS credentials
         id: aws-credentials
-        uses: aws-actions/configure-aws-credentials@e3dd6a429d7300a6a4c196c26e071d42e0343502
+        uses: aws-actions/configure-aws-credentials@v2
         with:
           role-to-assume: arn:aws:iam::612958166077:role/github-actions-for-deployments-lyonga-pipeline-org-role
           role-session-name: github-actions-for-deployments-lyonga-pipeline-org-role
-          aws-region: ${{ secrets.AWS_REGION}}
+          aws-region: ${{ secrets.AWS_REGION }}
 
-    #   - name: Configure AWS credentials
-    #     id: aws-credentials
-    #     uses: aws-actions/configure-aws-credentials@v1
-    #     with:
-    #         role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
-    #         aws-region: us-east-1
-
-    #   - name: Deploy to AWS
-    #     env:
-    #         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-    #         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-    #     run: |
-    #         aws s3 cp my-file.txt s3://my-bucket/my-file.txt
-    
+      - name: Verify AWS credentials
+        run: aws sts get-caller-identity
 
       - name: Install Terraform
         uses: hashicorp/setup-terraform@v1
