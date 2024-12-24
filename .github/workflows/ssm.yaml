@@ -27,7 +27,7 @@ jobs:
         id: aws-credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
-          role-to-assume: arn:aws:iam::612958166077:role/github-actions-for-deployments-lyonga-pipeline-org-role
+          role-to-assume: ${{ secrets.ROLE_ARN }}
           role-session-name: github-actions-for-deployments-lyonga-pipeline-org-role
           aws-region: ${{ secrets.AWS_REGION }}
 
