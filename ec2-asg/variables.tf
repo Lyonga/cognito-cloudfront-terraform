@@ -110,8 +110,8 @@ variable "vpc_ec2_subnet2" {
 }
 
 variable "subnet_ids" {
-  description = "EC2 subnet 2 (AZ-c)"
-  type        = string
+  description = "List of EC2 subnet IDs"
+  type        = list(string)
   default     = ["subnet-5a75fc7b", "subnet-ec81d3a1"]
 }
 

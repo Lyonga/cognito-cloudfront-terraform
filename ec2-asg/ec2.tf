@@ -77,11 +77,11 @@ resource "aws_ssm_document" "my_ssm_document" {
         type          = "StringList"
         default       = []
         description   = "(Optional) IP addresses of DNS servers in the directory."
-        allowedPattern = "((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)"
+        allowedPattern = "((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)"
       }
     }
     runtimeConfig = {
-      aws:domainJoin = {
+      "aws:domainJoin" = {
         properties = {
           directoryId    = "{{ directoryId }}"
           directoryName  = "{{ directoryName }}"
@@ -91,6 +91,7 @@ resource "aws_ssm_document" "my_ssm_document" {
     }
   })
 }
+
 
 resource "aws_security_group" "web_app_sg" {
   name_prefix        = "webapp-sg-${var.environment_name}-"
@@ -217,46 +218,46 @@ resource "aws_cloudwatch_metric_alarm" "ec2_instance_auto_recovery" {
   }
 }
 
-resource "aws_security_group" "web_app_sg" {
-  name        = "webapp-security-group-${var.Environment}"
-  description = "Allow HTTP/HTTPS and SSH inbound and outbound traffic"
-  vpc_id      = var.vpc_id
+# resource "aws_security_group" "web_app_sg" {
+#   name        = "webapp-security-group-${var.Environment}"
+#   description = "Allow HTTP/HTTPS and SSH inbound and outbound traffic"
+#   vpc_id      = var.vpc_id
 
-  ingress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
+#   ingress {
+#     from_port   = 80
+#     to_port     = 80
+#     protocol    = "tcp"
+#     cidr_blocks = ["0.0.0.0/0"]
+#   }
 
-  ingress {
-    from_port   = 443
-    to_port     = 443
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
+#   ingress {
+#     from_port   = 443
+#     to_port     = 443
+#     protocol    = "tcp"
+#     cidr_blocks = ["0.0.0.0/0"]
+#   }
 
-  ingress {
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
+#   ingress {
+#     from_port   = 22
+#     to_port     = 22
+#     protocol    = "tcp"
+#     cidr_blocks = ["0.0.0.0/0"]
+#   }
 
-  ingress {
-    from_port   = 3389
-    to_port     = 3389
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
+#   ingress {
+#     from_port   = 3389
+#     to_port     = 3389
+#     protocol    = "tcp"
+#     cidr_blocks = ["0.0.0.0/0"]
+#   }
 
-  tags = merge(
-    {
-      Name = "${var.Environment}-ec2-sg-${var.team}"
-    },
-    var.tags
-    )
-}
+#   tags = merge(
+#     {
+#       Name = "${var.Environment}-ec2-sg-${var.team}"
+#     },
+#     var.tags
+#     )
+# }
 
 resource "aws_ssm_association" "domain_join" {
   name = "${var.ec2-association-name}"
@@ -585,12 +586,13 @@ resource "aws_cloudwatch_metric_alarm" "system_status_alert_critical" {
   statistic                 = "Minimum"
   threshold                 = 0
   alarm_description         = "System Status Check Failed"
-  alarm_actions             = [aws_sns_topic.critical_sns.arn, "arn:aws:automate:\${var.region}:ec2:recover"]
+  alarm_actions             = [aws_sns_topic.critical_sns.arn, "arn:aws:automate:${var.region}:ec2:recover"]
   ok_actions                = [aws_sns_topic.warning_sns.arn]
   dimensions = {
     InstanceId = aws_instance.generic.id
   }
 }
+
 
 resource "aws_ssm_association" "asg_domain_join" {
   name = aws_ssm_document.my_ssm_document.name
