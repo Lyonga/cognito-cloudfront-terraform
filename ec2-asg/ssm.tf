@@ -101,7 +101,7 @@ resource "aws_ssm_document" "install_agents" {
 
 resource "aws_ssm_association" "install_crowdstrike" {
   name = aws_ssm_document.crowdstrike_install.name
-
+  document_version = "$DEFAULT"
   # Pass in parameters from SSM Param Store
   parameters = {
     FalconClientID    = [data.aws_ssm_parameter.falcon_client_id.value]
@@ -112,6 +112,10 @@ resource "aws_ssm_association" "install_crowdstrike" {
     key    = "InstanceIds"
     values = [aws_instance.generic.id]
   }
+#   targets {
+#     key    = "tag:${var.tag_key}"
+#     values = [var.tag_value]
+#   }
   #targets              = [{ Key = "tag:${var.target_tag_key}", Values = [var.target_tag_value] }]
   max_concurrency      = var.max_concurrency
   max_errors           = var.max_errors
@@ -161,6 +165,34 @@ resource "aws_ssm_document" "crowdstrike_install" {
   DOC
 }
 
-# 4) Create an SSM Association that applies the document to the EC2 instance
+resource "aws_ssm_document" "install_agents_windows" {
+  name            = "InstallCrowdstrikeDuoRapid7"
+  document_type   = "Command"
+  document_format = "YAML"
+
+  content = <<-DOC
+    schemaVersion: "2.2"
+    description: "Installs CrowdStrike, Duo, and Rapid7 on Windows via PowerShell."
+    parameters: {}
+    mainSteps:
+      - action: aws:runPowerShellScript
+        name: InstallAgents
+        inputs:
+          runCommand:
+            - "Write-Host 'Downloading and Installing CrowdStrike, Duo, and Rapid7...'"
+            - "New-Item -ItemType Directory -Force -Path 'C:\\Temp' | Out-Null"
+
+            - "powershell -Command \"(New-Object Net.WebClient).DownloadFile('${var.crowdstrike_exe_s3_url}', 'C:\\Temp\\CrowdStrikeSetup.exe')\""
+            - "Start-Process 'C:\\Temp\\CrowdStrikeSetup.exe' -ArgumentList '/quiet' -Wait"
+
+            - "powershell -Command \"(New-Object Net.WebClient).DownloadFile('${var.duo_msi_s3_url}', 'C:\\Temp\\DuoSetup.msi')\""
+            - "Start-Process 'msiexec.exe' -ArgumentList '/i C:\\Temp\\DuoSetup.msi /quiet /qn' -Wait"
+
+            - "powershell -Command \"(New-Object Net.WebClient).DownloadFile('${var.rapid7_msi_s3_url}', 'C:\\Temp\\Rapid7Setup.msi')\""
+            - "Start-Process 'msiexec.exe' -ArgumentList '/i C:\\Temp\\Rapid7Setup.msi /quiet /qn' -Wait"
+
+            - "Write-Host 'All agents installed successfully.'"
+  DOC
+}
 
 

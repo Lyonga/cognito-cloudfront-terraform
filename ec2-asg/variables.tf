@@ -136,7 +136,7 @@ variable "ec2_image_id" {
 variable "ec2_instance_type" {
   description = "EC2 InstanceType"
   type        = string
-  default     = "t3.micro"
+  default     = "t2.micro"
 }
 
 variable "instance_name" {
@@ -376,4 +376,32 @@ variable "ami_parameter_name" {
   type        = string
   description = "Parameter name for the Windows AMI in SSM"
   default     = "/aws/service/ami-windows-latest/Windows_Server-2019-English-Full-Base"
+}
+
+variable "tag_key" {
+  type    = string
+  default = "AutoInstallAgents"
+}
+
+variable "tag_value" {
+  type    = string
+  default = "true"
+}
+
+variable "crowdstrike_exe_s3_url" {
+  type        = string
+  description = "S3 path or presigned URL to the CrowdStrike EXE installer"
+    default     = "https://s3.us-east-2.amazonaws.com/crowdstrike-windows-agent-install/FalconSensor.exe"
+}
+
+variable "duo_msi_s3_url" {
+  type        = string
+  description = "S3 path or presigned URL to the Duo MSI installer"
+  default     = "https://s3.us-east-2.amazonaws.com/duo-windows-agent-install/duo_agent_v2.7.1"
+}
+
+variable "rapid7_msi_s3_url" {
+  type        = string
+  description = "S3 path or presigned URL to the Rapid7 MSI installer"
+  default     = "https://s3.us-east-2.amazonaws.com/rapid7-windows-agent-install/Rapid7-Agent-v5.24"
 }

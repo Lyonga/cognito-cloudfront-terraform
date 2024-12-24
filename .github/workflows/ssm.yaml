@@ -1,0 +1,43 @@
+name: cognito deployment
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - "ec2-asg/**"
+jobs:
+
+  build:
+
+    name: install Terraform and deploy
+    runs-on: ubuntu-latest
+
+
+    steps:
+
+      - name: Check out code
+        uses: actions/checkout@v2
+
+    #   - name: Configure AWS credentials
+    #     uses: aws-actions/configure-aws-credentials@v1
+    #     with:
+    #       aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+    #       aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+    #       aws-region: ${{ secrets.AWS_REGION}}
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1.7.0
+        with:
+          role-to-assume: ${{ secrets.ROLE_ARN }}
+          role-session-name: github-actions-for-deployments-lyonga-pipeline-org-role
+          aws-region: ${{ secrets.AWS_REGION}}
+
+      - name: Install Terraform
+        uses: hashicorp/setup-terraform@v1
+
+      - name: Deploy Terraform for AWS config
+        run: |
+          cd ec2-asg
+          terraform init
+          terraform plan
+          terraform apply -auto-approve
