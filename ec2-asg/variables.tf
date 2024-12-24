@@ -76,7 +76,7 @@ variable "environment_name" {
 }
 
 variable "environment_scp_tag" {
-  description = "Required tag value for scp"
+  description = "Required tag value for test"
   type        = string
   default     = "dev"
 }
