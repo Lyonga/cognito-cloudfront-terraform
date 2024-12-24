@@ -146,7 +146,7 @@ variable "instance_name" {
 }
 
 variable "volume" {
-  description = "The volume name or device"
+  description = "The volume name or device volume"
   type        = string
   default     = "/dev/xvda"
 }
