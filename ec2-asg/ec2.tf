@@ -52,22 +52,54 @@ resource "aws_iam_policy" "ec2_role_policy" {
       },
       {
         Effect   = "Allow"
-        Action   = ["ec2:DescribeInstances", "ec2:StartInstances", "ec2:StopInstances", "ec2:RebootInstances"]
+        Action   = [
+          "ec2:DescribeInstances",
+          "ec2:StartInstances",
+          "ec2:StopInstances",
+          "ec2:RebootInstances",
+          "ec2:DescribeTags"
+        ]
         Resource = "*"
       },
       {
         Effect   = "Allow"
-        Action   = ["ssm:*"]
+        Action   = [
+          "ssm:SendCommand",
+          "ssm:CreateAssociation",
+          "ssm:DescribeAssociation",
+          "ssm:GetParameters",
+          "ssm:GetParameter",
+          "ssm:ListDocuments",
+          "ssm:DescribeDocument",
+          "ssm:ListCommands",
+          "ssm:ListCommandInvocations"
+        ]
         Resource = "*"
       },
       {
         Effect   = "Allow"
-        Action   = ["cloudwatch:*"]
+        Action   = [
+          "ds:DescribeDirectories",
+          "ds:CreateComputer",
+          "ds:AuthorizeApplication",
+          "ds:UnauthorizeApplication"
+        ]
+        Resource = "*"
+      },
+      {
+        Effect   = "Allow"
+        Action   = [
+          "cloudwatch:DescribeAlarms",
+          "cloudwatch:GetMetricData",
+          "cloudwatch:PutMetricAlarm",
+          "cloudwatch:ListMetrics"
+        ]
         Resource = "*"
       }
     ]
   })
 }
+
 
 resource "aws_iam_role_policy_attachment" "custom_policy_attachment" {
   role       = aws_iam_role.ec2_instance_role.name
