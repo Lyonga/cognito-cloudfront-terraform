@@ -58,11 +58,47 @@ resource "aws_iam_instance_profile" "ec2_instance_profile" {
   role = aws_iam_role.ec2_instance_role.name
 } 
 
+# resource "aws_ssm_document" "my_ssm_document" {
+#   name          = "myssmdocument"
+#   document_type = "Automation"
+#   content       = jsonencode({
+#     schemaVersion = "0.3" # Updated schema version
+#     description   = "Join instances to an AWS Directory Service domain."
+#     parameters    = {
+#       directoryId = {
+#         type        = "String"
+#         description = "(Required) The ID of the AWS Directory Service directory."
+#       }
+#       directoryName = {
+#         type        = "String"
+#         description = "(Required) The name of the directory; e.g., test.example.com."
+#       }
+#       dnsIpAddresses = {
+#         type          = "StringList"
+#         default       = []
+#         description   = "(Optional) IP addresses of DNS servers in the directory."
+#         allowedPattern = "((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)"
+#       }
+#     }
+#     mainSteps = [ # Changed 'runtimeConfig' to 'mainSteps' for Automation documents
+#       {
+#         name = "DomainJoinStep"
+#         action = "aws:domainJoin"
+#         inputs = {
+#           directoryId    = "{{ directoryId }}"
+#           directoryName  = "{{ directoryName }}"
+#           dnsIpAddresses = "{{ dnsIpAddresses }}"
+#         }
+#       }
+#     ]
+#   })
+# }
+
 resource "aws_ssm_document" "my_ssm_document" {
   name          = "myssmdocument"
   document_type = "Automation"
   content       = jsonencode({
-    schemaVersion = "0.3" # Updated schema version
+    schemaVersion = "0.3"
     description   = "Join instances to an AWS Directory Service domain."
     parameters    = {
       directoryId = {
@@ -80,19 +116,23 @@ resource "aws_ssm_document" "my_ssm_document" {
         allowedPattern = "((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)"
       }
     }
-    mainSteps = [ # Changed 'runtimeConfig' to 'mainSteps' for Automation documents
+    mainSteps = [
       {
-        name = "DomainJoinStep"
-        action = "aws:domainJoin"
+        name = "JoinDomain"
+        action = "aws:runCommand" # Correct action
         inputs = {
-          directoryId    = "{{ directoryId }}"
-          directoryName  = "{{ directoryName }}"
-          dnsIpAddresses = "{{ dnsIpAddresses }}"
+          DocumentName = "AWS-JoinDirectoryServiceDomain"
+          Parameters = {
+            directoryId    = "{{ directoryId }}"
+            directoryName  = "{{ directoryName }}"
+            dnsIpAddresses = "{{ dnsIpAddresses }}"
+          }
         }
       }
     ]
   })
 }
+
 
 
 

@@ -94,25 +94,25 @@ variable "deployment_type" {
 variable "vpc_id" {
   description = "VPC ID for test"
   type        = string
-  default     = "vpc-8f8856f2"
+  default     = "vpc-755ee01e"
 }
 
 variable "vpc_ec2_subnet1" {
   description = "EC2 subnet 1 (AZ-a)"
   type        = string
-  default     = "subnet-5a75fc7b"
+  default     = "subnet-4430962f"
 }
 
 variable "vpc_ec2_subnet2" {
   description = "EC2 subnet 2 (AZ-c)"
   type        = string
-  default     = "subnet-ec81d3a1"
+  default     = "subnet-60534c1a"
 }
 
 variable "subnet_ids" {
   description = "List of EC2 subnet IDs"
   type        = list(string)
-  default     = ["subnet-5a75fc7b", "subnet-ec81d3a1"]
+  default     = ["subnet-4430962f", "subnet-60534c1a"]
 }
 
 variable "duo_radius_port" {
@@ -172,13 +172,13 @@ variable "ec2_instance_key_name" {
 variable "availability_zone" {
   description = "The AZ for deployment"
   type        = string
-  default     = "us-east-2b"
+  default     = "us-east-2a"
 }
 
 variable "region" {
   description = "The AWS region for deployment"
   type        = string
-  default     = "us-east-1"
+  default     = "us-east-2"
 }
 
 variable "ec2_instance_tag_name" {
