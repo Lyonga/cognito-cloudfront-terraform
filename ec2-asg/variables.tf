@@ -368,7 +368,7 @@ variable "falcon_client_secret_parameter_name" {
 
 variable "trusted_ip_address" {
   type        = string
-  description = "The CIDR block to allow RDP access"
+  description = "The CIDR block to allow RDP access will remove this to add my ip"
   default     = "1.2.3.4/32"
 }
 
