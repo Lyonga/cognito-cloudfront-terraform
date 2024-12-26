@@ -268,7 +268,7 @@ resource "aws_cloudwatch_metric_alarm" "ec2_instance_auto_recovery" {
 # }
 
 resource "aws_ssm_association" "domain_join" {
-  name = "${var.ec2-association-name}"
+  name = var.ec2-association-name
 
   targets {
     key    = "InstanceIds"
@@ -276,16 +276,17 @@ resource "aws_ssm_association" "domain_join" {
   }
 
   parameters = {
-    directoryId    = [var.ad_directory_id]
-    directoryName  = [var.ad_directory_name]
-    dnsIpAddresses = [var.ad_dns_ip_address1, var.ad_dns_ip_address2]
+    directoryId    = var.ad_directory_id
+    directoryName  = var.ad_directory_name
+    dnsIpAddresses = "${var.ad_dns_ip_address1},${var.ad_dns_ip_address2}" # Join into a single string
   }
 
-  association_name = "DomainJoinAssociation"
-  max_concurrency  = "1"
-  max_errors       = "0"
+  association_name    = "DomainJoinAssociation"
+  max_concurrency     = "1"
+  max_errors          = "0"
   compliance_severity = "CRITICAL"
 }
+
 
 resource "aws_launch_template" "asg_instance_launch_template" {
   name          = "NGL-AAE2-IP-VSA01AutoScaling"

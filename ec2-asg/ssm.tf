@@ -105,8 +105,8 @@ resource "aws_ssm_association" "install_crowdstrike" {
   document_version = "$DEFAULT"
   # Pass in parameters from SSM Param Store
   parameters = {
-    FalconClientID    = [data.aws_ssm_parameter.falcon_client_id.value]
-    FalconClientSecret = [data.aws_ssm_parameter.falcon_client_secret.value]
+    FalconClientID    = data.aws_ssm_parameter.falcon_client_id.value
+    FalconClientSecret = data.aws_ssm_parameter.falcon_client_secret.value
   }
 
   targets {
@@ -123,7 +123,7 @@ resource "aws_ssm_association" "install_crowdstrike" {
   compliance_severity  = "CRITICAL"
 
   # Optionally ensure association runs once instance is available
-  depends_on = [aws_instance.generic_instance]
+  depends_on = [aws_instance.generic]
 }
 
 
