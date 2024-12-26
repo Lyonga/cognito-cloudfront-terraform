@@ -130,7 +130,7 @@ variable "ssm_key" {
 variable "ec2_image_id" {
   description = "AMI ID"
   type        = string
-  default     = "ami-0f908ade2d5734ce2"
+  default     = "ami-0b1f2b17be9b81cdc"
 }
 
 variable "ec2_instance_type" {
@@ -178,7 +178,7 @@ variable "availability_zone" {
 variable "region" {
   description = "The AWS region for deployment"
   type        = string
-  default     = "us-east-2"
+  default     = "us-east-1"
 }
 
 variable "ec2_instance_tag_name" {

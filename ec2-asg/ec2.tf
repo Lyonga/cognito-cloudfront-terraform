@@ -62,7 +62,7 @@ resource "aws_ssm_document" "my_ssm_document" {
   name          = "myssmdocument"
   document_type = "Automation"
   content       = jsonencode({
-    schemaVersion = "1.2"
+    schemaVersion = "0.3" # Updated schema version
     description   = "Join instances to an AWS Directory Service domain."
     parameters    = {
       directoryId = {
@@ -80,17 +80,20 @@ resource "aws_ssm_document" "my_ssm_document" {
         allowedPattern = "((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)"
       }
     }
-    runtimeConfig = {
-      "aws:domainJoin" = {
-        properties = {
+    mainSteps = [ # Changed 'runtimeConfig' to 'mainSteps' for Automation documents
+      {
+        name = "DomainJoinStep"
+        action = "aws:domainJoin"
+        inputs = {
           directoryId    = "{{ directoryId }}"
           directoryName  = "{{ directoryName }}"
           dnsIpAddresses = "{{ dnsIpAddresses }}"
         }
       }
-    }
+    ]
   })
 }
+
 
 
 resource "aws_security_group" "web_app_sg" {
