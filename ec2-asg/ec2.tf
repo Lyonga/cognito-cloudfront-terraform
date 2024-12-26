@@ -1,28 +1,44 @@
 resource "aws_iam_role" "ec2_instance_role" {
   name               = "myEC2Role"
-  description        = "Instance role to attach to EC2 instances"
+  description        = "Instance role to attach to your EC2 instance"
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
       {
-        Effect    = "Allow"
-        Principal = { Service = "ec2.amazonaws.com" }
-        Action    = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          Service = "ec2.amazonaws.com"
+        }
+        Action = "sts:AssumeRole"
       }
     ]
   })
 
-  tags = merge(
-    {
-      Name = "${var.Environment}-ec2-role-${var.team}"
-    },
-    var.tags
-  )
+  tags = {
+    Name = "myEC2Role"
+  }
 }
 
-resource "aws_iam_policy" "ec2_instance_policy" {
+# Managed Policies for CloudWatch and SSM
+resource "aws_iam_role_policy_attachment" "cloudwatch_agent" {
+  role       = aws_iam_role.ec2_instance_role.name
+  policy_arn = "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
+}
+
+resource "aws_iam_role_policy_attachment" "ssm_managed_core" {
+  role       = aws_iam_role.ec2_instance_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+}
+
+resource "aws_iam_role_policy_attachment" "cloudwatch_admin" {
+  role       = aws_iam_role.ec2_instance_role.name
+  policy_arn = "arn:aws:iam::aws:policy/CloudWatchAgentAdminPolicy"
+}
+
+# Custom Policy for Additional Permissions
+resource "aws_iam_policy" "ec2_role_policy" {
   name        = "ec2role_policy"
-  description = "Managed policy for EC2 instances"
+  description = "Custom policy for EC2 role"
   policy      = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -30,33 +46,40 @@ resource "aws_iam_policy" "ec2_instance_policy" {
         Effect   = "Allow"
         Action   = ["s3:GetObject*", "s3:ListBucket", "s3:GetBucketLocation"]
         Resource = [
-          "arn:aws:s3:::${var.bucketname}/",
+          "arn:aws:s3:::${var.bucketname}",
           "arn:aws:s3:::${var.bucketname}/*"
         ]
       },
       {
         Effect   = "Allow"
-        Action   = ["logs:CreateLogStream", "logs:CreateLogGroup", "logs:PutLogEvents", "logs:DescribeLogStreams"]
-        Resource = "arn:aws:logs:*:*:*"
+        Action   = ["ec2:DescribeInstances", "ec2:StartInstances", "ec2:StopInstances", "ec2:RebootInstances"]
+        Resource = "*"
       },
       {
         Effect   = "Allow"
-        Action   = ["ssm:*", "cloudwatch:DescribeAlarms", "cloudwatch:GetMetricData"]
+        Action   = ["ssm:*"]
+        Resource = "*"
+      },
+      {
+        Effect   = "Allow"
+        Action   = ["cloudwatch:*"]
         Resource = "*"
       }
     ]
   })
 }
 
-resource "aws_iam_role_policy_attachment" "ec2_instance_policy_attachment" {
+resource "aws_iam_role_policy_attachment" "custom_policy_attachment" {
   role       = aws_iam_role.ec2_instance_role.name
-  policy_arn = aws_iam_policy.ec2_instance_policy.arn
+  policy_arn = aws_iam_policy.ec2_role_policy.arn
 }
 
+# IAM Instance Profile
 resource "aws_iam_instance_profile" "ec2_instance_profile" {
   name = "ec2instanceprofile"
   role = aws_iam_role.ec2_instance_role.name
-} 
+}
+
 
 # resource "aws_ssm_document" "my_ssm_document" {
 #   name          = "myssmdocument"
