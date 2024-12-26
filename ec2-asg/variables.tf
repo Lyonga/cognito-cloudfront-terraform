@@ -92,7 +92,7 @@ variable "deployment_type" {
 }
 
 variable "vpc_id" {
-  description = "VPC ID for test"
+  description = "VPC ID for testing"
   type        = string
   default     = "vpc-755ee01e"
 }
