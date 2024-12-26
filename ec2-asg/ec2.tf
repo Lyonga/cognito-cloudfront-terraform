@@ -186,7 +186,7 @@ resource "aws_instance" "generic" {
   subnet_id                   = var.vpc_ec2_subnet1
   availability_zone           = var.availability_zone
   key_name                    = aws_launch_template.ec2_instance_launch_template.key_name
-  iam_instance_profile        = aws_launch_template.ec2_instance_launch_template.iam_instance_profile.name
+  iam_instance_profile        = aws_launch_template.ec2_instance_launch_template.iam_instance_profile[0].name
   launch_template {
     id      = aws_launch_template.ec2_instance_launch_template.id
     version = aws_launch_template.ec2_instance_launch_template.latest_version
@@ -389,11 +389,11 @@ resource "aws_cloudwatch_metric_alarm" "cpu_high_alarm" {
   alarm_description   = "Alarm if CPU > 80%"
 
   dimensions = {
-    AutoScalingGroupName = aws_autoscaling_group.asg[0].name
+    AutoScalingGroupName = aws_autoscaling_group.ec2_asg.name
   }
 
   alarm_actions = [
-    aws_autoscaling_policy.scaling_policy[0].arn
+    aws_autoscaling_policy.scaling_policy.arn
   ]
 }
 
@@ -444,7 +444,7 @@ resource "aws_lb" "alb" {
   load_balancer_type = "application"
   security_groups    = [aws_security_group.web_server.id]
   #subnets            = var.subnet_ids
-  subnets = length(var.subnet_ids) > 0 ? var.subnet_ids : [var.subnet1, var.subnet2]
+  subnets = length(var.subnet_ids) > 0 ? var.subnet_ids : [var.vpc_ec2_subnet1, var.vpc_ec2_subnet2]
 
   tags = merge(
     {
@@ -613,7 +613,7 @@ resource "aws_ssm_association" "asg_domain_join" {
   parameters = {
     directoryId    = var.ad_directory_id
     directoryName  = var.ad_directory_name
-    dnsIpAddresses = [var.ad_dns_ip_address1, var.ad_dns_ip_address2]
+    dnsIpAddresses = "${var.ad_dns_ip_address1},${var.ad_dns_ip_address2}" # Join IPs into a string
   }
 
   max_concurrency     = "1"
@@ -624,6 +624,7 @@ resource "aws_ssm_association" "asg_domain_join" {
     aws_launch_template.ec2_instance_launch_template
   ]
 }
+
 
 # AWS EFS file system
 resource "aws_efs_file_system" "ds_efs_file_system" {
