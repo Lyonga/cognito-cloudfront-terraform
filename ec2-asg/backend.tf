@@ -1,6 +1,6 @@
 terraform {
   backend "s3" {
-    bucket         = "charlyoinfotect.cm"
+    bucket         = "terraform-backend-buck-ssm-test"
     region         = "us-east-2"
     key            = "ec2-res/terraform.tfstate"
     #dynamodb_table = "Lock-Files"

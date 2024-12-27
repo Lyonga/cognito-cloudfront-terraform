@@ -36,7 +36,7 @@ variable "target_tag_value" {
 variable "bucketname" {
   description = "Name of the S3 bucket containing the agent installers."
   type        = string
-  default     = "charlyo-mini"
+  default     = "terraform-backend-buck-ssm-test"
 }
 
 variable "schedule_rate_expression" {
