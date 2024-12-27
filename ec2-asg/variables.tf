@@ -22,7 +22,7 @@ variable "agent_list" {
 }
 
 variable "target_tag_key" {
-  description = "Tag key used to identify target instances."
+  description = "Tag key used to identify target instances test."
   type        = string
   default     = "AGENT_DEPLOY"
 }
