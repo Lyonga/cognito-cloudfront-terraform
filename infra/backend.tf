@@ -2,7 +2,7 @@ terraform {
   backend "s3" {
     bucket         = "charlyoinfotect.cm"
     region         = "us-east-1"
-    key            = "testLlmdeploy/terraform.tfstate"
+    key            = "ec2-res/terraform.tfstate"
     #dynamodb_table = "Lock-Files"
     encrypt = true
   }
