@@ -53,7 +53,7 @@ data "aws_iam_policy_document" "ssm_policy" {
 }
 
 resource "aws_ssm_document" "install_agents" {
-  name          = "AgentInstallationDocument"
+  name          = "SecurityAgentInstallationDocument"
   document_type = "Automation"
 
   content = jsonencode({
@@ -131,7 +131,7 @@ resource "aws_ssm_association" "install_crowdstrike" {
 
 # 3) Define a custom SSM Document to download & install the CrowdStrike sensor
 resource "aws_ssm_document" "crowdstrike_install" {
-  name          = "Install-CrowdStrike-Sensor"
+  name          = "Install-CrowdStrike-Sensor-Dou-rapid7"
   document_type = "Command"
 
   content = <<-DOC
