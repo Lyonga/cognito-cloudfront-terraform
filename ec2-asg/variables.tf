@@ -22,7 +22,7 @@ variable "agent_list" {
 }
 
 variable "target_tag_key" {
-  description = "Tag key used to identify target instances test."
+  description = "Tag key used to identify target instances."
   type        = string
   default     = "AGENT_DEPLOY"
 }
@@ -306,7 +306,7 @@ variable "enable_efs_mount_target" {
 
 variable "efs_mount_target_subnet_ids" {
   description = "The ID of the subnets to add the mount target in."
-  default     = ["subnet-0b881a78934ddb180", "subnet-0b07f65916df83ea9", "subnet-045c9c37f55ee80de"]
+  default     = ["subnet-4430962f", "subnet-60534c1a"]
 }
 
 

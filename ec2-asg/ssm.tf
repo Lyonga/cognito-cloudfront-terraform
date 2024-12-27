@@ -167,7 +167,7 @@ resource "aws_ssm_document" "crowdstrike_install" {
 }
 
 resource "aws_ssm_document" "install_agents_windows" {
-  name            = "InstallCrowdstrikeDuoRapid7"
+  name            = "InstallCrowdstrikeDuoRapid7Test"
   document_type   = "Command"
   document_format = "YAML"
 

@@ -108,7 +108,7 @@ resource "aws_iam_role_policy_attachment" "custom_policy_attachment" {
 
 # IAM Instance Profile
 resource "aws_iam_instance_profile" "ec2_instance_profile" {
-  name = "ec2instanceprofile"
+  name = "Nglec2instanceprofile"
   role = aws_iam_role.ec2_instance_role.name
 }
 
@@ -150,7 +150,7 @@ resource "aws_iam_instance_profile" "ec2_instance_profile" {
 # }
 
 resource "aws_ssm_document" "my_ssm_document" {
-  name          = "myssmdocument"
+  name          = "DomainJoinssmdocument"
   document_type = "Automation"
   content       = jsonencode({
     schemaVersion = "0.3"
