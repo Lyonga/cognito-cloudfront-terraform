@@ -127,38 +127,73 @@ resource "aws_iam_instance_profile" "ec2_instance_profile" {
   role = aws_iam_role.ec2_instance_role.name
 }
 
-
-resource "aws_ssm_document" "myapp_dir_default_doc" {
-	name  = "TestDomainssmdocument"
-	document_type = "Command"
-
-	content = <<DOC
-{
-        "schemaVersion": "1.0",
-        "description": "Join an instance to a domain",
-        "runtimeConfig": {
-           "aws:domainJoin": {
-               "properties": {
-                  "directoryId": "${var.ad_directory_id}",
-                  "directoryName": "${var.ad_directory_name}",
-                  "dnsIpAddresses": [
-                     "${var.dns_ip_addresses[0]}",
-                     "${var.dns_ip_addresses[1]}"
+# AD Join 
+resource "aws_ssm_document" "api_ad_join_domain" {
+ name          = "ad-join-domain"
+ document_type = "Command"
+ content = jsonencode(
+  {
+    "schemaVersion" = "2.2"
+    "description"   = "aws:domainJoin"
+    "mainSteps" = [
+      {
+        "action" = "aws:domainJoin",
+        "name"   = "domainJoin",
+        "inputs" = {
+          "directoryId": var.ad_directory_id,
+          "directoryName" : var.ad_directory_name
+       "dnsIpAddresses" : [
+                     var.dns_ip_addresses[0],
+                     var.dns_ip_addresses[1]
                   ]
-               }
-           }
+          }
         }
+      ]
+    }
+  )
 }
-DOC
 
-	#depends_on = ["aws_directory_service_directory.myapp_ad"]
-}
+# Associate Policy to Instance
+resource "aws_ssm_association" "ad_join_domain_association" {
+  depends_on = [ aws_instance.generic ]
+  name = aws_ssm_document.api_ad_join_domain.name
+  targets {
+    key    = "InstanceIds"
+    values = [ aws_instance.generic.id ]
+  }
 
-resource "aws_ssm_association" "myapp_adwriter" {
-	name = "TestDomainJoinssmdocument"
-	instance_id = "${aws_instance.generic.id}"
-	depends_on = ["aws_ssm_document.myapp_dir_default_doc", "aws_instance.generic"]
-}
+# resource "aws_ssm_document" "myapp_dir_default_doc" {
+# 	name  = "TestDomainssmdocument"
+# 	document_type = "Command"
+
+# 	content = <<DOC
+# {
+#         "schemaVersion": "1.0",
+#         "description": "Join an instance to a domain",
+#         "runtimeConfig": {
+#            "aws:domainJoin": {
+#                "properties": {
+#                   "directoryId": "${var.ad_directory_id}",
+#                   "directoryName": "${var.ad_directory_name}",
+#                   "dnsIpAddresses": [
+#                      "${var.dns_ip_addresses[0]}",
+#                      "${var.dns_ip_addresses[1]}"
+#                   ]
+#                }
+#            }
+#         }
+# }
+# DOC
+
+# 	#depends_on = ["aws_directory_service_directory.myapp_ad"]
+# }
+
+# resource "aws_ssm_association" "myapp_adwriter" {
+# 	name = "TestDomainJoinssmdocument"
+# 	instance_id = "${aws_instance.generic.id}"
+# 	depends_on = ["aws_ssm_document.myapp_dir_default_doc", "aws_instance.generic"]
+# }
+
 
 resource "aws_ssm_document" "my_ssm_document" {
   name          = "DomainJoinssmdocument"

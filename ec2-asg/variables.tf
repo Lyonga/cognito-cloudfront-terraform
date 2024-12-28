@@ -229,7 +229,7 @@ variable "ad_dns_ip_address2" {
   default     = "10.49.1.10"
 }
 variable "dns_ip_addresses" {
-  type = "list"
+  type        = list(string)
   description = "id of aws directory service AD domain."
   default = ["10.49.2.10", "10.49.1.10"]
 }
