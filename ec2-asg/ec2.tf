@@ -181,6 +181,7 @@ resource "aws_ssm_document" "my_ssm_document" {
             directoryId    = "{{ directoryId }}"
             directoryName  = "{{ directoryName }}"
             dnsIpAddresses = "{{ dnsIpAddresses }}"
+            automationAssumeRole = "{{ automationAssumeRole }}"
           }
         }
       }
@@ -387,9 +388,10 @@ resource "aws_ssm_association" "domain_join" {
 
 
 resource "aws_launch_template" "asg_instance_launch_template" {
-  name          = "NGL-AAE2-IP-VSA01AutoScaling"
+  name          = "NGL-AAE2-AutoScaling"
   instance_type = var.ec2_instance_type
   key_name      = var.ec2_instance_key_name
+  image_id             = var.ec2_image_id
 
   iam_instance_profile {
     name = aws_iam_instance_profile.ec2_instance_profile.name
@@ -700,6 +702,55 @@ resource "aws_cloudwatch_metric_alarm" "system_status_alert_critical" {
   }
 }
 
+resource "aws_iam_role" "ssm_automation_role" {
+  name = "SSMAutomationRole"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect = "Allow",
+        Principal = {
+          Service = "ssm.amazonaws.com"
+        },
+        Action = "sts:AssumeRole"
+      }
+    ]
+  })
+}
+
+# Attach AWS’ pre-built policy that covers common SSM Automation actions
+resource "aws_iam_role_policy_attachment" "ssm_automation_role_attachment" {
+  role       = aws_iam_role.ssm_automation_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonSSMAutomationRole"
+}
+
+# Optionally attach more policies if needed (e.g., DS or custom):
+resource "aws_iam_policy" "ssm_automation_extra" {
+  name   = "ssm-automation-extra"
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect: "Allow",
+        Action: [
+          "ds:DescribeDirectories",
+          "ds:CreateComputer",
+          "ds:AuthorizeApplication",
+          "ds:UnauthorizeApplication"
+        ],
+        Resource = "*"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "attach_ssm_automation_extra" {
+  role       = aws_iam_role.ssm_automation_role.name
+  policy_arn = aws_iam_policy.ssm_automation_extra.arn
+}
+
+
 
 resource "aws_ssm_association" "asg_domain_join" {
   name = aws_ssm_document.my_ssm_document.name
@@ -713,6 +764,7 @@ resource "aws_ssm_association" "asg_domain_join" {
     directoryId    = var.ad_directory_id
     directoryName  = var.ad_directory_name
     dnsIpAddresses = "${var.ad_dns_ip_address1},${var.ad_dns_ip_address2}" # Join IPs into a string
+    automationAssumeRole = aws_iam_role.ssm_automation_role.arn
   }
 
   max_concurrency     = "1"

@@ -130,7 +130,7 @@ variable "ssm_key" {
 variable "ec2_image_id" {
   description = "AMI ID"
   type        = string
-  default     = "ami-0b1f2b17be9b81cdc"
+  default     = "ami-01b14e65cd6ad74f9"
 }
 
 variable "ec2_instance_type" {
