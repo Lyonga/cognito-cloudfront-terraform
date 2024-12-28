@@ -294,7 +294,7 @@ variable "efs_file_system_throughput_mode" {
 }
 
 variable "efs_file_system_lifecycle_policy" {
-  description = "(Optional) A file system lifecycle policy object test"
+  description = "(Optional) A file system lifecycle policy object"
   default     = []
 }
 
