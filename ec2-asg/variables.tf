@@ -294,7 +294,7 @@ variable "efs_file_system_throughput_mode" {
 }
 
 variable "efs_file_system_lifecycle_policy" {
-  description = "(Optional) A file system lifecycle policy object"
+  description = "(Optional) A file system lifecycle policy object test"
   default     = []
 }
 
@@ -305,7 +305,7 @@ variable "enable_efs_mount_target" {
 }
 
 variable "efs_mount_target_subnet_ids" {
-  description = "The ID of the subnets to add the mount target in."
+  description = "The ID of the subnets to add the mount target in"
   default     = ["subnet-4430962f", "subnet-60534c1a"]
 }
 
