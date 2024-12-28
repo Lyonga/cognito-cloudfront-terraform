@@ -228,6 +228,12 @@ variable "ad_dns_ip_address2" {
   type        = string
   default     = "10.49.1.10"
 }
+variable "dns_ip_addresses" {
+  type = "list"
+  description = "id of aws directory service AD domain."
+  default = ["10.49.2.10", "10.49.1.10"]
+}
+
 
 variable "bucket_name" {
   description = "S3 storage name"

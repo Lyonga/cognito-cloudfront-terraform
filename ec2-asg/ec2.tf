@@ -129,7 +129,7 @@ resource "aws_iam_instance_profile" "ec2_instance_profile" {
 
 
 resource "aws_ssm_document" "myapp_dir_default_doc" {
-	name  = "myapp_dir_default_doc"
+	name  = "TestDomainssmdocument"
 	document_type = "Command"
 
 	content = <<DOC
@@ -142,8 +142,8 @@ resource "aws_ssm_document" "myapp_dir_default_doc" {
                   "directoryId": "${var.ad_directory_id}",
                   "directoryName": "${var.ad_directory_name}",
                   "dnsIpAddresses": [
-                     "${var.ad_dns_ip_address1}",
-                     "${var.ad_dns_ip_address2}"
+                     "${var.dns_ip_addresses[0]}",
+                     "${var.dns_ip_addresses[1]}"
                   ]
                }
            }
