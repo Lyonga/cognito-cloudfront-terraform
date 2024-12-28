@@ -276,6 +276,16 @@ resource "aws_launch_template" "ec2_instance_launch_template" {
     )
   }
 
+  # Tag volumes as well
+  tag_specifications {
+    resource_type = "volume"
+    tags = merge(
+      {
+        Name = "${var.Environment}-template-volume-${var.team}"
+      },
+      var.tags
+    )
+  }
   metadata_options {
     http_tokens               = "required"
     http_endpoint             = "enabled"
@@ -301,6 +311,7 @@ resource "aws_instance" "generic" {
   tags = merge(
     {
       Name = "${var.Environment}-ec2-instance-${var.team}"
+      DomainJoin = "true"
     },
     var.tags
   )
@@ -382,6 +393,7 @@ resource "aws_ssm_association" "domain_join" {
     directoryId    = var.ad_directory_id
     directoryName  = var.ad_directory_name
     dnsIpAddresses = "${var.ad_dns_ip_address1},${var.ad_dns_ip_address2}" # Join into a single string
+    automationAssumeRole = aws_iam_role.ssm_automation_role.arn
   }
 
   association_name    = "DomainJoinAssociation"
@@ -400,6 +412,12 @@ resource "aws_launch_template" "asg_instance_launch_template" {
   iam_instance_profile {
     name = aws_iam_instance_profile.ec2_instance_profile.name
   }
+  metadata_options {
+    http_tokens               = "required"
+    http_endpoint             = "enabled"
+    http_put_response_hop_limit = 1
+  }
+
 
   network_interfaces {
     associate_public_ip_address = false
@@ -423,6 +441,16 @@ resource "aws_launch_template" "asg_instance_launch_template" {
       Name = "${var.Environment}-asg-template-${var.team}"
     },
     var.tags
+    )
+  }
+  # Tag volumes as well
+  tag_specifications {
+    resource_type = "volume"
+    tags = merge(
+      {
+        Name = "${var.Environment}-template-volume-${var.team}"
+      },
+      var.tags
     )
   }
 }
