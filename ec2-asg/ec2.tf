@@ -161,6 +161,7 @@ resource "aws_ssm_association" "ad_join_domain_association" {
     key    = "InstanceIds"
     values = [ aws_instance.generic.id ]
   }
+}
 
 # resource "aws_ssm_document" "myapp_dir_default_doc" {
 # 	name  = "TestDomainssmdocument"
