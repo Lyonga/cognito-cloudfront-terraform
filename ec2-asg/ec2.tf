@@ -170,6 +170,10 @@ resource "aws_ssm_document" "my_ssm_document" {
         description   = "(Optional) IP addresses of DNS servers in the directory."
         allowedPattern = "((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)"
       }
+      automationAssumeRole = {
+        type        = "String"
+        description = "IAM role for SSM Automation to assume"
+      }
     }
     mainSteps = [
       {
@@ -321,7 +325,7 @@ resource "aws_cloudwatch_metric_alarm" "ec2_instance_auto_recovery" {
   comparison_operator       = "GreaterThanOrEqualToThreshold"
   alarm_actions             = ["arn:aws:automate:${var.region}:ec2:recover"]
   dimensions = {
-    InstanceId = aws_launch_template.ec2_instance_launch_template.id
+    InstanceId = aws_instance.generic.id
   }
 }
 
