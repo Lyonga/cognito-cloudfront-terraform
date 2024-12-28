@@ -151,7 +151,7 @@ resource "aws_ssm_document" "myapp_dir_default_doc" {
 }
 DOC
 
-	depends_on = ["aws_directory_service_directory.myapp_ad"]
+	#depends_on = ["aws_directory_service_directory.myapp_ad"]
 }
 
 resource "aws_ssm_association" "myapp_adwriter" {
