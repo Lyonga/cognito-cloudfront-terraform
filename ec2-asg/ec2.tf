@@ -434,15 +434,6 @@ resource "aws_launch_template" "asg_instance_launch_template" {
     }
   }
 
-  tag_specifications {
-    resource_type = "instance"
-    tags = merge(
-    {
-      Name = "${var.Environment}-asg-template-${var.team}"
-    },
-    var.tags
-    )
-  }
   # Tag volumes as well
   tag_specifications {
     resource_type = "volume"
@@ -453,6 +444,16 @@ resource "aws_launch_template" "asg_instance_launch_template" {
       var.tags
     )
   }
+  tag_specifications {
+    resource_type = "instance"
+    tags = merge(
+    {
+      Name = "${var.Environment}-asg-template-${var.team}"
+    },
+    var.tags
+    )
+  }
+  
 }
 
 resource "aws_autoscaling_group" "ec2_asg" {
