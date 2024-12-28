@@ -72,7 +72,22 @@ resource "aws_iam_policy" "ec2_role_policy" {
           "ssm:ListDocuments",
           "ssm:DescribeDocument",
           "ssm:ListCommands",
-          "ssm:ListCommandInvocations"
+          "ssm:ListCommandInvocations",
+          "ssm:DescribeAssociation",
+          "ssm:ListAssociations",
+          "ssm:GetDocument",
+          "ssm:ListInstanceAssociations",
+          "ssm:UpdateAssociationStatus",
+          "ssm:UpdateInstanceInformation",
+          "ec2messages:AcknowledgeMessage",
+          "ec2messages:DeleteMessage",
+          "ec2messages:FailMessage",
+          "ec2messages:GetEndpoint",
+          "ec2messages:GetMessages",
+          "ec2messages:SendReply",
+          "ds:CreateComputer",
+          "ds:DescribeDirectories",
+          "ec2:DescribeInstanceStatus"
         ]
         Resource = "*"
       },
@@ -113,41 +128,37 @@ resource "aws_iam_instance_profile" "ec2_instance_profile" {
 }
 
 
-# resource "aws_ssm_document" "my_ssm_document" {
-#   name          = "myssmdocument"
-#   document_type = "Automation"
-#   content       = jsonencode({
-#     schemaVersion = "0.3" # Updated schema version
-#     description   = "Join instances to an AWS Directory Service domain."
-#     parameters    = {
-#       directoryId = {
-#         type        = "String"
-#         description = "(Required) The ID of the AWS Directory Service directory."
-#       }
-#       directoryName = {
-#         type        = "String"
-#         description = "(Required) The name of the directory; e.g., test.example.com."
-#       }
-#       dnsIpAddresses = {
-#         type          = "StringList"
-#         default       = []
-#         description   = "(Optional) IP addresses of DNS servers in the directory."
-#         allowedPattern = "((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)"
-#       }
-#     }
-#     mainSteps = [ # Changed 'runtimeConfig' to 'mainSteps' for Automation documents
-#       {
-#         name = "DomainJoinStep"
-#         action = "aws:domainJoin"
-#         inputs = {
-#           directoryId    = "{{ directoryId }}"
-#           directoryName  = "{{ directoryName }}"
-#           dnsIpAddresses = "{{ dnsIpAddresses }}"
-#         }
-#       }
-#     ]
-#   })
-# }
+resource "aws_ssm_document" "myapp_dir_default_doc" {
+	name  = "myapp_dir_default_doc"
+	document_type = "Command"
+
+	content = <<DOC
+{
+        "schemaVersion": "1.0",
+        "description": "Join an instance to a domain",
+        "runtimeConfig": {
+           "aws:domainJoin": {
+               "properties": {
+                  "directoryId": "${var.ad_directory_id}",
+                  "directoryName": "${var.ad_directory_name}",
+                  "dnsIpAddresses": [
+                     "${var.ad_dns_ip_address1}",
+                     "${var.ad_dns_ip_address2}"
+                  ]
+               }
+           }
+        }
+}
+DOC
+
+	depends_on = ["aws_directory_service_directory.myapp_ad"]
+}
+
+resource "aws_ssm_association" "myapp_adwriter" {
+	name = "TestDomainJoinssmdocument"
+	instance_id = "${aws_instance.generic.id}"
+	depends_on = ["aws_ssm_document.myapp_dir_default_doc", "aws_instance.generic"]
+}
 
 resource "aws_ssm_document" "my_ssm_document" {
   name          = "DomainJoinssmdocument"
@@ -170,10 +181,10 @@ resource "aws_ssm_document" "my_ssm_document" {
         description   = "(Optional) IP addresses of DNS servers in the directory."
         allowedPattern = "((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)"
       }
-      automationAssumeRole = {
-        type        = "String"
-        description = "IAM role for SSM Automation to assume"
-      }
+    #   automationAssumeRole = {
+    #     type        = "String"
+    #     description = "IAM role for SSM Automation to assume"
+    #   }
     }
     mainSteps = [
       {
@@ -185,7 +196,7 @@ resource "aws_ssm_document" "my_ssm_document" {
             directoryId    = "{{ directoryId }}"
             directoryName  = "{{ directoryName }}"
             dnsIpAddresses = "{{ dnsIpAddresses }}"
-            automationAssumeRole = "{{ automationAssumeRole }}"
+            #automationAssumeRole = "{{ automationAssumeRole }}"
           }
         }
       }
@@ -393,7 +404,7 @@ resource "aws_ssm_association" "domain_join" {
     directoryId    = var.ad_directory_id
     directoryName  = var.ad_directory_name
     dnsIpAddresses = "${var.ad_dns_ip_address1},${var.ad_dns_ip_address2}" # Join into a single string
-    automationAssumeRole = aws_iam_role.ssm_automation_role.arn
+    #automationAssumeRole = aws_iam_role.ssm_automation_role.arn
   }
 
   association_name    = "DomainJoinAssociation"
@@ -797,7 +808,7 @@ resource "aws_ssm_association" "asg_domain_join" {
     directoryId    = var.ad_directory_id
     directoryName  = var.ad_directory_name
     dnsIpAddresses = "${var.ad_dns_ip_address1},${var.ad_dns_ip_address2}" # Join IPs into a string
-    automationAssumeRole = aws_iam_role.ssm_automation_role.arn
+    #automationAssumeRole = aws_iam_role.ssm_automation_role.arn
   }
 
   max_concurrency     = "1"
