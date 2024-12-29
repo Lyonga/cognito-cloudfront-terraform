@@ -440,7 +440,7 @@ resource "aws_ssm_association" "domain_join" {
     directoryId    = var.ad_directory_id
     directoryName  = var.ad_directory_name
     dnsIpAddresses = "${var.ad_dns_ip_address1},${var.ad_dns_ip_address2}" # Join into a single string
-    #automationAssumeRole = aws_iam_role.ssm_automation_role.arn
+    automationAssumeRole = aws_iam_role.ssm_automation_role.arn
   }
 
   association_name    = "DomainJoinAssociation"
@@ -844,7 +844,7 @@ resource "aws_ssm_association" "asg_domain_join" {
     directoryId    = var.ad_directory_id
     directoryName  = var.ad_directory_name
     dnsIpAddresses = "${var.ad_dns_ip_address1},${var.ad_dns_ip_address2}" # Join IPs into a string
-    #automationAssumeRole = aws_iam_role.ssm_automation_role.arn
+    automationAssumeRole = aws_iam_role.ssm_automation_role.arn
   }
 
   max_concurrency     = "1"
