@@ -196,49 +196,49 @@ resource "aws_ssm_association" "ad_join_domain_association" {
 # }
 
 
-resource "aws_ssm_document" "my_ssm_document" {
-  name          = "DomainJoinssmdocument"
-  document_type = "Automation"
-  content       = jsonencode({
-    schemaVersion = "0.3"
-    description   = "Join instances to an AWS Directory Service domain."
-    parameters    = {
-      directoryId = {
-        type        = "String"
-        description = "(Required) The ID of the AWS Directory Service directory."
-      }
-      directoryName = {
-        type        = "String"
-        description = "(Required) The name of the directory; e.g., test.example.com."
-      }
-      dnsIpAddresses = {
-        type          = "StringList"
-        default       = []
-        description   = "(Optional) IP addresses of DNS servers in the directory."
-        allowedPattern = "((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)"
-      }
-    #   automationAssumeRole = {
-    #     type        = "String"
-    #     description = "IAM role for SSM Automation to assume"
-    #   }
-    }
-    mainSteps = [
-      {
-        name = "JoinDomain"
-        action = "aws:runCommand" # Correct action
-        inputs = {
-          DocumentName = "AWS-JoinDirectoryServiceDomain"
-          Parameters = {
-            directoryId    = "{{ directoryId }}"
-            directoryName  = "{{ directoryName }}"
-            dnsIpAddresses = "{{ dnsIpAddresses }}"
-            #automationAssumeRole = "{{ automationAssumeRole }}"
-          }
-        }
-      }
-    ]
-  })
-}
+# resource "aws_ssm_document" "my_ssm_document" {
+#   name          = "DomainJoinssmdocument"
+#   document_type = "Automation"
+#   content       = jsonencode({
+#     schemaVersion = "0.3"
+#     description   = "Join instances to an AWS Directory Service domain."
+#     parameters    = {
+#       directoryId = {
+#         type        = "String"
+#         description = "(Required) The ID of the AWS Directory Service directory."
+#       }
+#       directoryName = {
+#         type        = "String"
+#         description = "(Required) The name of the directory; e.g., test.example.com."
+#       }
+#       dnsIpAddresses = {
+#         type          = "StringList"
+#         default       = []
+#         description   = "(Optional) IP addresses of DNS servers in the directory."
+#         allowedPattern = "((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)"
+#       }
+#     #   automationAssumeRole = {
+#     #     type        = "String"
+#     #     description = "IAM role for SSM Automation to assume"
+#     #   }
+#     }
+#     mainSteps = [
+#       {
+#         name = "JoinDomain"
+#         action = "aws:runCommand" # Correct action
+#         inputs = {
+#           DocumentName = "AWS-JoinDirectoryServiceDomain"
+#           Parameters = {
+#             directoryId    = "{{ directoryId }}"
+#             directoryName  = "{{ directoryName }}"
+#             dnsIpAddresses = "{{ dnsIpAddresses }}"
+#             #automationAssumeRole = "{{ automationAssumeRole }}"
+#           }
+#         }
+#       }
+#     ]
+#   })
+# }
 
 
 
@@ -428,26 +428,26 @@ resource "aws_cloudwatch_metric_alarm" "ec2_instance_auto_recovery" {
 #     )
 # }
 
-resource "aws_ssm_association" "domain_join" {
-  name = var.ec2-association-name
+# resource "aws_ssm_association" "domain_join" {
+#   name = var.ec2-association-name
 
-  targets {
-    key    = "InstanceIds"
-    values = [aws_instance.generic.id]
-  }
+#   targets {
+#     key    = "InstanceIds"
+#     values = [aws_instance.generic.id]
+#   }
 
-  parameters = {
-    directoryId    = var.ad_directory_id
-    directoryName  = var.ad_directory_name
-    dnsIpAddresses = "${var.ad_dns_ip_address1},${var.ad_dns_ip_address2}" # Join into a single string
-    automationAssumeRole = aws_iam_role.ssm_automation_role.arn
-  }
+#   parameters = {
+#     directoryId    = var.ad_directory_id
+#     directoryName  = var.ad_directory_name
+#     dnsIpAddresses = "${var.ad_dns_ip_address1},${var.ad_dns_ip_address2}" # Join into a single string
+#     automationAssumeRole = aws_iam_role.ssm_automation_role.arn
+#   }
 
-  association_name    = "DomainJoinAssociation"
-  max_concurrency     = "1"
-  max_errors          = "0"
-  compliance_severity = "CRITICAL"
-}
+#   association_name    = "DomainJoinAssociation"
+#   max_concurrency     = "1"
+#   max_errors          = "0"
+#   compliance_severity = "CRITICAL"
+# }
 
 
 resource "aws_launch_template" "asg_instance_launch_template" {
@@ -832,29 +832,29 @@ resource "aws_iam_role_policy_attachment" "attach_ssm_automation_extra" {
 
 
 
-resource "aws_ssm_association" "asg_domain_join" {
-  name = aws_ssm_document.my_ssm_document.name
+# resource "aws_ssm_association" "asg_domain_join" {
+#   name = aws_ssm_document.my_ssm_document.name
 
-  targets {
-    key    = "tag:Name"
-    values = ["${var.environment_name}-DomainJoin"]
-  }
+#   targets {
+#     key    = "tag:Name"
+#     values = ["${var.environment_name}-DomainJoin"]
+#   }
 
-  parameters = {
-    directoryId    = var.ad_directory_id
-    directoryName  = var.ad_directory_name
-    dnsIpAddresses = "${var.ad_dns_ip_address1},${var.ad_dns_ip_address2}" # Join IPs into a string
-    automationAssumeRole = aws_iam_role.ssm_automation_role.arn
-  }
+#   parameters = {
+#     directoryId    = var.ad_directory_id
+#     directoryName  = var.ad_directory_name
+#     dnsIpAddresses = "${var.ad_dns_ip_address1},${var.ad_dns_ip_address2}" # Join IPs into a string
+#     automationAssumeRole = aws_iam_role.ssm_automation_role.arn
+#   }
 
-  max_concurrency     = "1"
-  max_errors          = "0"
-  compliance_severity = "CRITICAL"
-  depends_on = [
-    aws_ssm_document.my_ssm_document,
-    aws_launch_template.ec2_instance_launch_template
-  ]
-}
+#   max_concurrency     = "1"
+#   max_errors          = "0"
+#   compliance_severity = "CRITICAL"
+#   depends_on = [
+#     aws_ssm_document.my_ssm_document,
+#     aws_launch_template.ec2_instance_launch_template
+#   ]
+# }
 
 
 # AWS EFS file system
