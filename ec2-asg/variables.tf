@@ -212,7 +212,7 @@ variable "ad_directory_id" {
 }
 
 variable "ad_directory_name" {
-  description = "Active Directory Name"
+  description = "Active Directory Name test"
   type        = string
   default     = "nglic.local"
 }
