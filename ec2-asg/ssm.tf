@@ -57,7 +57,8 @@ resource "aws_ssm_document" "install_agents" {
   document_type = "Automation"
   tags =          var.tags
   content = jsonencode({
-    schemaVersion = "0.3"
+    #schemaVersion = "0.3"
+    schemaVersion = "2.2"
     description   = "Install security agents on EC2 instances."
     parameters    = {
       InstanceIds  = { type = "StringList", description = "List of EC2 Instance IDs." }
@@ -168,7 +169,6 @@ resource "aws_ssm_association" "install_crowdstrike" {
 resource "aws_ssm_document" "crowdstrike_install" {
   name          = "Install-CrowdStrike-Sensor"
   document_type = "Command"
-
   content = <<-DOC
   {
     "schemaVersion": "2.2",
@@ -178,10 +178,10 @@ resource "aws_ssm_document" "crowdstrike_install" {
         "type": "String",
         "description": "Falcon Client ID"
       },
-      # "FalconClientSecret": {
-      #   "type": "String",
-      #   "description": "Falcon Client Secret"
-      # }
+      "FalconClientSecret": {
+        "type": "String",
+        "description": "Falcon Client Secret"
+      }
     },
     "mainSteps": [
       {
@@ -200,6 +200,7 @@ resource "aws_ssm_document" "crowdstrike_install" {
   }
   DOC
 }
+
 
 # resource "aws_ssm_document" "install_agents_windows" {
 #   name            = "InstallCrowdstrikeDuoRapid7Test"
