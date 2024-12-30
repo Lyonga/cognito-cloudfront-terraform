@@ -316,7 +316,7 @@ resource "aws_launch_template" "ec2_instance_launch_template" {
   block_device_mappings {
     device_name = "/dev/sda1"            # or "/dev/xvda" depending on AMI
     ebs {
-      volume_size           = 8
+      volume_size           = 30
       volume_type           = "gp3"
       delete_on_termination = true
       # encrypted             = true
@@ -494,7 +494,7 @@ resource "aws_launch_template" "asg_instance_launch_template" {
   block_device_mappings {
     device_name = "/dev/sda1"            
     ebs {
-      volume_size           = 8
+      volume_size           = 30
       volume_type           = "gp3"
       delete_on_termination = true
       # encrypted             = true
