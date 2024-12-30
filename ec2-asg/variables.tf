@@ -248,7 +248,7 @@ variable "object_prefix" {
 }
 
 variable "email_address" {
-  description = "Enter Your Email Address."
+  description = "Enter Your Email Add"
   type        = string
   default     = "c.lyonga03@yahoo.com"
 }
