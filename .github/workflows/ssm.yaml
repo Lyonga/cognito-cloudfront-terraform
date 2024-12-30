@@ -37,9 +37,9 @@ jobs:
       - name: Install Terraform
         uses: hashicorp/setup-terraform@v1
 
-      - name: Deploy Terraform for AWS config
+      - name: Deploy Terraform for AWS infrastructure
         run: |
           cd ec2-asg
           terraform init
           terraform plan
-          terraform destroy -auto-approve
+          terraform apply -auto-approve
