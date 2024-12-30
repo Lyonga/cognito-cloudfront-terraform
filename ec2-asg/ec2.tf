@@ -313,6 +313,16 @@ resource "aws_launch_template" "ec2_instance_launch_template" {
 #     EOT
 #     )
 
+  block_device_mappings {
+    device_name = "/dev/sda1"            # or "/dev/xvda" depending on AMI
+    ebs {
+      volume_size           = 8
+      volume_type           = "gp3"
+      delete_on_termination = true
+      # encrypted             = true
+      # kms_key_id            = var.ebs_kms_key_arn  
+    }
+  }
   tag_specifications {
     resource_type = "instance"
     tags = merge(
@@ -357,7 +367,7 @@ resource "aws_instance" "generic" {
   ]
   tags = merge(
     {
-      Name = "${var.Environment}-ec2-instance-${var.team}"
+      Name = "${var.stack_name}-ec2-instance-${var.team}"
       DomainJoin = "true"
     },
     var.tags
@@ -481,12 +491,21 @@ resource "aws_launch_template" "asg_instance_launch_template" {
     }
   }
 
-  # Tag volumes as well
+  block_device_mappings {
+    device_name = "/dev/sda1"            
+    ebs {
+      volume_size           = 8
+      volume_type           = "gp3"
+      delete_on_termination = true
+      # encrypted             = true
+      # kms_key_id            = var.ebs_kms_key_arn  
+    }
+  }
   tag_specifications {
     resource_type = "volume"
     tags = merge(
       {
-        Name = "${var.Environment}-template-volume-${var.team}"
+        Name = "${var.stack_name}-template-volume-${var.team}"
       },
       var.tags
     )
@@ -495,7 +514,8 @@ resource "aws_launch_template" "asg_instance_launch_template" {
     resource_type = "instance"
     tags = merge(
     {
-      Name = "${var.Environment}-asg-template-${var.team}"
+      Name = "${var.stack_name}-asg-template-${var.team}"
+      DomainJoin = "true"
     },
     var.tags
     )
@@ -530,7 +550,7 @@ resource "aws_autoscaling_group" "ec2_asg" {
 
   tag {
     key                 = "Name"
-    value               = "${var.environment_name}-DomainJoin"
+    value               = "${var.environment_name}-asg-ec2"
     propagate_at_launch = true
   }
 }

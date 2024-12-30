@@ -66,7 +66,7 @@ variable "automation_role_name" {
 variable "stack_name" {
   description = "Name of stack, change to suit your naming style"
   type        = string
-  default     = "dev-test-resiliency"
+  default     = "ec2-resiliency"
 }
 
 variable "environment_name" {
@@ -410,4 +410,10 @@ variable "rapid7_msi_s3_url" {
   type        = string
   description = "S3 path or presigned URL to the Rapid7 MSI installer"
   default     = "https://s3.us-east-2.amazonaws.com/rapid7-windows-agent-install/Rapid7-Agent-v5.24"
+}
+
+variable "ebs_kms_key_arn" {
+  type        = string
+  description = "kms key for encyptyion"
+  default     = ""
 }
