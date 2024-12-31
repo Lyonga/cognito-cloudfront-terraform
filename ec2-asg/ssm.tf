@@ -179,12 +179,10 @@ resource "aws_ssm_association" "install_crowdstrike" {
 }
 
 
-
-
-# 3) Define a custom SSM Document to download & install the CrowdStrike sensor
 resource "aws_ssm_document" "crowdstrike_install" {
   name          = "Install-CrowdStrike-Sensor"
   document_type = "Command"
+
   content = <<-DOC
   {
     "schemaVersion": "2.2",
@@ -203,7 +201,7 @@ resource "aws_ssm_document" "crowdstrike_install" {
           "runCommand": [
             "$client = New-Object System.Net.WebClient",
             "$client.DownloadFile('https://raw.githubusercontent.com/CrowdStrike/Cloud-AWS/master/Agent-Install-Examples/powershell/sensor_install.ps1', 'C:\\\\Windows\\\\Temp\\\\sensor.ps1')",
-            "powershell.exe C:\\\\Windows\\\\Temp\\\\sensor.ps1 {{FalconClientID}},
+            "powershell.exe C:\\\\Windows\\\\Temp\\\\sensor.ps1 {{FalconClientID}}",
             "Remove-Item 'C:\\\\Windows\\\\Temp\\\\sensor.ps1' -Force"
           ]
         }
@@ -212,6 +210,39 @@ resource "aws_ssm_document" "crowdstrike_install" {
   }
   DOC
 }
+
+
+# 3) Define a custom SSM Document to download & install the CrowdStrike sensor
+# resource "aws_ssm_document" "crowdstrike_install" {
+#   name          = "Install-CrowdStrike-Sensor"
+#   document_type = "Command"
+#   content = <<-DOC
+#   {
+#     "schemaVersion": "2.2",
+#     "description": "Install the CrowdStrike Windows sensor from GitHub script",
+#     "parameters": {
+#       "FalconClientID": {
+#         "type": "String",
+#         "description": "Falcon Client ID"
+#       }
+#     },
+#     "mainSteps": [
+#       {
+#         "action": "aws:runPowerShellScript",
+#         "name": "InstallCrowdstrikeSensor",
+#         "inputs": {
+#           "runCommand": [
+#             "$client = New-Object System.Net.WebClient",
+#             "$client.DownloadFile('https://raw.githubusercontent.com/CrowdStrike/Cloud-AWS/master/Agent-Install-Examples/powershell/sensor_install.ps1', 'C:\\\\Windows\\\\Temp\\\\sensor.ps1')",
+#             "powershell.exe C:\\\\Windows\\\\Temp\\\\sensor.ps1 {{FalconClientID}},
+#             "Remove-Item 'C:\\\\Windows\\\\Temp\\\\sensor.ps1' -Force"
+#           ]
+#         }
+#       }
+#     ]
+#   }
+#   DOC
+# }
 
 
 # resource "aws_ssm_document" "install_agents_windows" {
