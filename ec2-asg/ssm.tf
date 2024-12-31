@@ -66,13 +66,29 @@ resource "aws_ssm_document" "install_agents" {
       Region       = { type = "String", default = "${data.aws_region.current.name}" }
     }
     mainSteps = [
+      # {
+      #   "name": "DownloadAWSCLI",
+      #   "action": "aws:downloadContent",
+      #   "inputs": {
+      #     "sourceType": "HTTP",
+      #     "sourceInfo": "{\"path\":\"https://awscli.amazonaws.com/AWSCLIV2.msi\"}",
+      #     "destinationPath": "C:\\Temp\\AWSCLIV2.msi"
+      #   }
+      # }
       {
         "name": "DownloadAWSCLI",
-        "action": "aws:downloadContent",
+        "action": "aws:runCommand",
         "inputs": {
-          "sourceType": "HTTP",
-          "sourceInfo": "{\"path\":\"https://awscli.amazonaws.com/AWSCLIV2.msi\"}",
-          "destinationPath": "C:\\Temp\\AWSCLIV2.msi"
+          "DocumentName": "AWS-RunPowerShellScript",
+          "InstanceIds": "{{ InstanceIds }}",
+          "Parameters": {
+            "commands": [
+              "$path = 'C:\\Temp\\AWSCLIV2.msi'",
+              "$url  = 'https://awscli.amazonaws.com/AWSCLIV2.msi'",
+              "New-Item -ItemType Directory -Path (Split-Path $path) -Force | Out-Null",
+              "Invoke-WebRequest -Uri $url -OutFile $path"
+            ]
+          }
         }
       },
       {
@@ -177,7 +193,7 @@ resource "aws_ssm_document" "crowdstrike_install" {
       "FalconClientID": {
         "type": "String",
         "description": "Falcon Client ID"
-      },
+      }
       # "FalconClientSecret": {
       #   "type": "String",
       #   "description": "Falcon Client Secret"
