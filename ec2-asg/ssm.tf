@@ -194,10 +194,6 @@ resource "aws_ssm_document" "crowdstrike_install" {
         "type": "String",
         "description": "Falcon Client ID"
       }
-      # "FalconClientSecret": {
-      #   "type": "String",
-      #   "description": "Falcon Client Secret"
-      # }
     },
     "mainSteps": [
       {
