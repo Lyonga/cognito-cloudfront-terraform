@@ -203,7 +203,7 @@ resource "aws_ssm_document" "crowdstrike_install" {
           "runCommand": [
             "$client = New-Object System.Net.WebClient",
             "$client.DownloadFile('https://raw.githubusercontent.com/CrowdStrike/Cloud-AWS/master/Agent-Install-Examples/powershell/sensor_install.ps1', 'C:\\\\Windows\\\\Temp\\\\sensor.ps1')",
-            "powershell.exe C:\\\\Windows\\\\Temp\\\\sensor.ps1 {{FalconClientID}} {{FalconClientSecret}}",
+            "powershell.exe C:\\\\Windows\\\\Temp\\\\sensor.ps1 {{FalconClientID}},
             "Remove-Item 'C:\\\\Windows\\\\Temp\\\\sensor.ps1' -Force"
           ]
         }
