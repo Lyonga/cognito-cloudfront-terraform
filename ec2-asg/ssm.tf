@@ -247,6 +247,89 @@ resource "aws_ssm_document" "crowdstrike_install" {
 #   }
 #   DOC
 # }
+resource "aws_ssm_document" "install_agents_linux" {
+  name          = "NglSecurityAgentInstallationDocumentLinux"
+  document_type = "Automation"
+  content = jsonencode({
+    schemaVersion = "0.3"
+    description   = "Install security agents on Linux EC2 instances."
+    parameters    = {
+      InstanceIds  = { type = "StringList", description = "List of EC2 Instance IDs." }
+      S3BucketName = { type = "String", description = "S3 bucket containing the installers.", default = var.bucket_name }
+    }
+    mainSteps = [
+      {
+        # Download and install AWS CLI for Linux
+        name    = "DownloadAWSCLI"
+        action  = "aws:runCommand"
+        inputs  = {
+          DocumentName = "AWS-RunShellScript"
+          InstanceIds  = "{{ InstanceIds }}"
+          Parameters   = {
+            commands = [
+              "sudo mkdir -p /opt/awscli",
+              "cd /opt/awscli",
+              "curl -O https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip",
+              "unzip awscli-exe-linux-x86_64.zip",
+              "sudo ./aws/install"
+            ]
+          }
+        }
+      },
+      {
+        # Install CrowdStrike for Linux
+        name    = "InstallCrowdStrike"
+        action  = "aws:runCommand"
+        inputs  = {
+          DocumentName = "AWS-RunShellScript"
+          InstanceIds  = "{{ InstanceIds }}"
+          Parameters   = {
+            commands = [
+              "sudo mkdir -p /opt/crowdstrike",
+              "cd /opt/crowdstrike",
+              "aws s3 cp s3://{{ S3BucketName }}/crowdstrike-linux.rpm .",
+              "sudo rpm -ivh crowdstrike-linux.rpm"
+            ]
+          }
+        }
+      },
+      {
+        # Install Rapid7 for Linux, same pattern
+        name    = "InstallRapid7"
+        action  = "aws:runCommand"
+        inputs  = {
+          DocumentName = "AWS-RunShellScript"
+          InstanceIds  = "{{ InstanceIds }}"
+          Parameters   = {
+            commands = [
+              "sudo mkdir -p /opt/rapid7",
+              "cd /opt/rapid7",
+              "aws s3 cp s3://{{ S3BucketName }}/rapid7-agent.rpm .",
+              "sudo rpm -ivh rapid7-agent.rpm"
+            ]
+          }
+        }
+      },
+      {
+        # Install Duo for Linux
+        name    = "InstallDuo"
+        action  = "aws:runCommand"
+        inputs  = {
+          DocumentName = "AWS-RunShellScript"
+          InstanceIds  = "{{ InstanceIds }}"
+          Parameters   = {
+            commands = [
+              "sudo mkdir -p /opt/duo",
+              "cd /opt/duo",
+              "aws s3 cp s3://{{ S3BucketName }}/duoagent.rpm .",
+              "sudo rpm -ivh duoagent.rpm"
+            ]
+          }
+        }
+      }
+    ]
+  })
+}
 
 
 # resource "aws_ssm_document" "install_agents_windows" {
