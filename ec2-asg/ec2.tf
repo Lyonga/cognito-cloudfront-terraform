@@ -397,9 +397,169 @@ resource "aws_cloudwatch_metric_alarm" "ec2_instance_auto_recovery" {
   }
 }
 
-# resource "aws_security_group" "web_app_sg" {
-#   name        = "webapp-security-group-${var.Environment}"
-#   description = "Allow HTTP/HTTPS and SSH inbound and outbound traffic"
+# resource "aws_ssm_association" "domain_join" {
+#   name = var.ec2-association-name
+
+#   targets {
+#     key    = "InstanceIds"
+#     values = [aws_instance.generic.id]
+#   }
+
+#   parameters = {
+#     directoryId    = var.ad_directory_id
+#     directoryName  = var.ad_directory_name
+#     dnsIpAddresses = "${var.ad_dns_ip_address1},${var.ad_dns_ip_address2}" # Join into a single string
+#     automationAssumeRole = aws_iam_role.ssm_automation_role.arn
+#   }
+
+#   association_name    = "DomainJoinAssociation"
+#   max_concurrency     = "1"
+#   max_errors          = "0"
+#   compliance_severity = "CRITICAL"
+# }
+
+
+# resource "aws_launch_template" "asg_instance_launch_template" {
+#   name          = "NGL-AAE2-AutoScaling"
+#   instance_type = var.ec2_instance_type
+#   key_name      = var.ec2_instance_key_name
+#   image_id             = var.ec2_image_id
+
+#   iam_instance_profile {
+#     name = aws_iam_instance_profile.ec2_instance_profile.name
+#   }
+#   metadata_options {
+#     http_tokens               = "required"
+#     http_endpoint             = "enabled"
+#     http_put_response_hop_limit = 1
+#   }
+
+
+#   network_interfaces {
+#     associate_public_ip_address = false
+#     subnet_id                   = element(var.subnet_ids, 0)
+#     security_groups             = [aws_security_group.web_server.id]
+#   }
+
+#   block_device_mappings {
+#     device_name = "/dev/xvda"
+#     ebs {
+#       volume_size = 8
+#       delete_on_termination = true
+#       volume_type = "gp2"
+#     }
+#   }
+
+#   block_device_mappings {
+#     device_name = "/dev/sda1"            
+#     ebs {
+#       volume_size           = 30
+#       volume_type           = "gp3"
+#       delete_on_termination = true
+#       # encrypted             = true
+#       # kms_key_id            = var.ebs_kms_key_arn  
+#     }
+#   }
+#   tag_specifications {
+#     resource_type = "volume"
+#     tags = merge(
+#       {
+#         Name = "${var.stack_name}-template-volume-${var.team}"
+#       },
+#       var.tags
+#     )
+#   }
+#   tag_specifications {
+#     resource_type = "instance"
+#     tags = merge(
+#     {
+#       Name = "${var.stack_name}-asg-template-${var.team}"
+#       DomainJoin = "true"
+#     },
+#     var.tags
+#     )
+#   }
+  
+# }
+
+# resource "aws_autoscaling_group" "ec2_asg" {
+#   launch_template {
+#     id      = aws_launch_template.asg_instance_launch_template.id
+#     version = "$Latest"
+#   }
+
+#   #vpc_zone_identifier       = var.subnet_ids
+#   vpc_zone_identifier = [
+#     var.vpc_ec2_subnet1,
+#     var.vpc_ec2_subnet2
+#   ]
+#   min_size                  = var.ec2_autoscale_min_size
+#   max_size                  = var.ec2_autoscale_max_size
+#   desired_capacity          = var.ec2_autoscale_desired_capacity
+#   health_check_type         = "EC2"
+#   health_check_grace_period = 900
+#   lifecycle {
+#     create_before_destroy = true
+#   }
+#   termination_policies = [
+#     "OldestLaunchConfiguration",
+#     "OldestInstance"
+#   ]
+#   target_group_arns = [aws_lb_target_group.ec2_target_group.arn]
+
+#   tag {
+#     key                 = "Name"
+#     value               = "${var.environment_name}-asg-ec2"
+#     propagate_at_launch = true
+#   }
+# }
+
+# # Scaling Policies, CloudWatch Alarms, etc. (cluster scenario)
+# ########################################
+# resource "aws_autoscaling_policy" "cluster_cpu_policy" {
+#   name                  = "${var.stack_name}-scaling-out-Policy"
+#   policy_type           = "TargetTrackingScaling"
+#   adjustment_type       = "ChangeInCapacity"
+#   autoscaling_group_name = aws_autoscaling_group.ec2_asg.name
+
+#   target_tracking_configuration {
+#     predefined_metric_specification {
+#       predefined_metric_type = "ASGAverageCPUUtilization"
+#     }
+#     target_value = 60
+#   }
+# }
+
+# resource "aws_autoscaling_policy" "scaling_policy" {
+#   name                  = "${var.stack_name}-scaling-in-Policy"
+#   adjustment_type       = "ChangeInCapacity"
+#   scaling_adjustment    = 1
+#   autoscaling_group_name = aws_autoscaling_group.ec2_asg.name
+# }
+
+# resource "aws_cloudwatch_metric_alarm" "cpu_high_alarm" {
+#   alarm_name          = "${var.stack_name}-cpuHighAlarm"
+#   comparison_operator = "GreaterThanThreshold"
+#   evaluation_periods  = 1
+#   metric_name         = "CPUUtilization"
+#   namespace           = "AWS/EC2"
+#   period              = 60
+#   statistic           = "Average"
+#   threshold           = 80
+#   alarm_description   = "Alarm if CPU > 80%"
+
+#   dimensions = {
+#     AutoScalingGroupName = aws_autoscaling_group.ec2_asg.name
+#   }
+
+#   alarm_actions = [
+#     aws_autoscaling_policy.scaling_policy.arn
+#   ]
+# }
+
+# resource "aws_security_group" "web_server" {
+#   name        = "${var.environment_name}-webapp-sg"
+#   description = "Allow HTTP and SSH"
 #   vpc_id      = var.vpc_id
 
 #   ingress {
@@ -423,10 +583,10 @@ resource "aws_cloudwatch_metric_alarm" "ec2_instance_auto_recovery" {
 #     cidr_blocks = ["0.0.0.0/0"]
 #   }
 
-#   ingress {
-#     from_port   = 3389
-#     to_port     = 3389
-#     protocol    = "tcp"
+#   egress {
+#     from_port   = 0
+#     to_port     = 0
+#     protocol    = "-1"
 #     cidr_blocks = ["0.0.0.0/0"]
 #   }
 
@@ -438,417 +598,216 @@ resource "aws_cloudwatch_metric_alarm" "ec2_instance_auto_recovery" {
 #     )
 # }
 
-# resource "aws_ssm_association" "domain_join" {
-#   name = var.ec2-association-name
+# resource "aws_lb" "alb" {
+#   name               = "ngl-test-alb"
+#   internal           = true
+#   load_balancer_type = "application"
+#   security_groups    = [aws_security_group.web_server.id]
+#   #subnets            = var.subnet_ids
+#   subnets = length(var.subnet_ids) > 0 ? var.subnet_ids : [var.vpc_ec2_subnet1, var.vpc_ec2_subnet2]
 
-#   targets {
-#     key    = "InstanceIds"
-#     values = [aws_instance.generic.id]
-#   }
-
-#   parameters = {
-#     directoryId    = var.ad_directory_id
-#     directoryName  = var.ad_directory_name
-#     dnsIpAddresses = "${var.ad_dns_ip_address1},${var.ad_dns_ip_address2}" # Join into a single string
-#     automationAssumeRole = aws_iam_role.ssm_automation_role.arn
-#   }
-
-#   association_name    = "DomainJoinAssociation"
-#   max_concurrency     = "1"
-#   max_errors          = "0"
-#   compliance_severity = "CRITICAL"
+#   tags = merge(
+#     {
+#       Name = "${var.Environment}-ec2-alb-${var.team}"
+#     },
+#     var.tags
+#     )
 # }
 
+# resource "aws_lb_target_group" "ec2_target_group" {
+#   name        = "ngl-test-alb-trp"
+#   port        = 80
+#   protocol    = "HTTP"
+#   vpc_id      = var.vpc_id
 
-resource "aws_launch_template" "asg_instance_launch_template" {
-  name          = "NGL-AAE2-AutoScaling"
-  instance_type = var.ec2_instance_type
-  key_name      = var.ec2_instance_key_name
-  image_id             = var.ec2_image_id
+#   health_check {
+#     enabled             = true
+#     interval            = 30
+#     healthy_threshold   = 5
+#     unhealthy_threshold = 5
+#     matcher             = "200"
+#     port     = "80"
+#     protocol = "HTTP"
+#     path     = "/"
+#     timeout  = 5
+#   }
 
-  iam_instance_profile {
-    name = aws_iam_instance_profile.ec2_instance_profile.name
-  }
-  metadata_options {
-    http_tokens               = "required"
-    http_endpoint             = "enabled"
-    http_put_response_hop_limit = 1
-  }
+#   tags = {
+#     Name         = "NGL-AAE2-IP-VSA01CloudFormationTG"
+#     Project      = "infrastructure-tools"
+#     Environment  = var.environment_name
+#     Backup       = "true"
+#     Service-Name = "infrastructure"
+#   }
+# }
 
+# resource "aws_lb_listener" "alb_listener" {
+#   load_balancer_arn = aws_lb.alb.arn
+#   port              = 80
+#   protocol          = "HTTP"
 
-  network_interfaces {
-    associate_public_ip_address = false
-    subnet_id                   = element(var.subnet_ids, 0)
-    security_groups             = [aws_security_group.web_server.id]
-  }
+#   default_action {
+#     type             = "forward"
+#     target_group_arn = aws_lb_target_group.ec2_target_group.arn
+#   }
+# }
 
-  block_device_mappings {
-    device_name = "/dev/xvda"
-    ebs {
-      volume_size = 8
-      delete_on_termination = true
-      volume_type = "gp2"
-    }
-  }
+# resource "aws_sns_topic" "warning_sns" {
+#   name = var.warning_sns
+# }
 
-  block_device_mappings {
-    device_name = "/dev/sda1"            
-    ebs {
-      volume_size           = 30
-      volume_type           = "gp3"
-      delete_on_termination = true
-      # encrypted             = true
-      # kms_key_id            = var.ebs_kms_key_arn  
-    }
-  }
-  tag_specifications {
-    resource_type = "volume"
-    tags = merge(
-      {
-        Name = "${var.stack_name}-template-volume-${var.team}"
-      },
-      var.tags
-    )
-  }
-  tag_specifications {
-    resource_type = "instance"
-    tags = merge(
-    {
-      Name = "${var.stack_name}-asg-template-${var.team}"
-      DomainJoin = "true"
-    },
-    var.tags
-    )
-  }
-  
-}
+# resource "aws_sns_topic" "critical_sns" {
+#   name = var.critical_sns
+# }
 
-resource "aws_autoscaling_group" "ec2_asg" {
-  launch_template {
-    id      = aws_launch_template.asg_instance_launch_template.id
-    version = "$Latest"
-  }
+# resource "aws_sns_topic_subscription" "warning_email" {
+#   topic_arn = aws_sns_topic.warning_sns.arn
+#   protocol  = "email"
+#   endpoint  = var.email_address
+# }
 
-  #vpc_zone_identifier       = var.subnet_ids
-  vpc_zone_identifier = [
-    var.vpc_ec2_subnet1,
-    var.vpc_ec2_subnet2
-  ]
-  min_size                  = var.ec2_autoscale_min_size
-  max_size                  = var.ec2_autoscale_max_size
-  desired_capacity          = var.ec2_autoscale_desired_capacity
-  health_check_type         = "EC2"
-  health_check_grace_period = 900
-  lifecycle {
-    create_before_destroy = true
-  }
-  termination_policies = [
-    "OldestLaunchConfiguration",
-    "OldestInstance"
-  ]
-  target_group_arns = [aws_lb_target_group.ec2_target_group.arn]
+# resource "aws_sns_topic_subscription" "critical_email" {
+#   topic_arn = aws_sns_topic.critical_sns.arn
+#   protocol  = "email"
+#   endpoint  = var.email_address
+# }
 
-  tag {
-    key                 = "Name"
-    value               = "${var.environment_name}-asg-ec2"
-    propagate_at_launch = true
-  }
-}
+# # CloudWatch Alarms
+# resource "aws_cloudwatch_metric_alarm" "cpu_alarm_warning" {
+#   alarm_name                = "CPUAlarmWARNING"
+#   comparison_operator       = "GreaterThanOrEqualToThreshold"
+#   evaluation_periods        = 1
+#   metric_name               = "CPUUtilization"
+#   namespace                 = "AWS/EC2"
+#   period                    = 300
+#   statistic                 = "Average"
+#   threshold                 = 70
+#   alarm_description         = "High CPU Usage 70%"
+#   alarm_actions             = [aws_sns_topic.critical_sns.arn]
+#   ok_actions                = [aws_sns_topic.warning_sns.arn]
+#   dimensions = {
+#     InstanceId = aws_instance.generic.id
+#   }
+# }
 
-# Scaling Policies, CloudWatch Alarms, etc. (cluster scenario)
-########################################
-resource "aws_autoscaling_policy" "cluster_cpu_policy" {
-  name                  = "${var.stack_name}-scaling-out-Policy"
-  policy_type           = "TargetTrackingScaling"
-  adjustment_type       = "ChangeInCapacity"
-  autoscaling_group_name = aws_autoscaling_group.ec2_asg.name
+# resource "aws_cloudwatch_metric_alarm" "memory_alarm_critical" {
+#   alarm_name                = "MemoryAlarmCRITICAL"
+#   comparison_operator       = "GreaterThanOrEqualToThreshold"
+#   evaluation_periods        = 1
+#   metric_name               = "mem_used_percent"
+#   namespace                 = "CWAgent"
+#   period                    = 900
+#   statistic                 = "Average"
+#   threshold                 = 90
+#   alarm_description         = "High Memory Usage 90%"
+#   alarm_actions             = [aws_sns_topic.critical_sns.arn]
+#   ok_actions                = [aws_sns_topic.warning_sns.arn]
+#   dimensions = {
+#     InstanceId = aws_instance.generic.id
+#   }
+# }
 
-  target_tracking_configuration {
-    predefined_metric_specification {
-      predefined_metric_type = "ASGAverageCPUUtilization"
-    }
-    target_value = 60
-  }
-}
+# resource "aws_cloudwatch_metric_alarm" "instance_status_alarm_critical" {
+#   alarm_name                = "InstanceStatusAlarmCRITICAL"
+#   comparison_operator       = "GreaterThanThreshold"
+#   evaluation_periods        = 3
+#   metric_name               = "StatusCheckFailed_Instance"
+#   namespace                 = "AWS/EC2"
+#   period                    = 120
+#   statistic                 = "Minimum"
+#   threshold                 = 0
+#   alarm_description         = "Instance Status Check Failed"
+#   alarm_actions             = [aws_sns_topic.critical_sns.arn]
+#   ok_actions                = [aws_sns_topic.warning_sns.arn]
+#   dimensions = {
+#     InstanceId = aws_instance.generic.id
+#   }
+# }
 
-resource "aws_autoscaling_policy" "scaling_policy" {
-  name                  = "${var.stack_name}-scaling-in-Policy"
-  adjustment_type       = "ChangeInCapacity"
-  scaling_adjustment    = 1
-  autoscaling_group_name = aws_autoscaling_group.ec2_asg.name
-}
+# resource "aws_cloudwatch_metric_alarm" "disk_space_alarm_critical" {
+#   alarm_name                = "DiskSpaceAlarmCRITICAL"
+#   comparison_operator       = "GreaterThanOrEqualToThreshold"
+#   evaluation_periods        = 1
+#   metric_name               = "disk_used_percent"
+#   namespace                 = "CWAgent"
+#   period                    = 300
+#   statistic                 = "Average"
+#   threshold                 = 95
+#   alarm_description         = "Disk Space Usage Over 95%"
+#   alarm_actions             = [aws_sns_topic.critical_sns.arn]
+#   ok_actions                = [aws_sns_topic.warning_sns.arn]
+#   dimensions = {
+#     InstanceId = aws_instance.generic.id
+#     device     = var.volume
+#     path       = var.path
+#     fstype     = var.fstype
+#   }
+# }
 
-resource "aws_cloudwatch_metric_alarm" "cpu_high_alarm" {
-  alarm_name          = "${var.stack_name}-cpuHighAlarm"
-  comparison_operator = "GreaterThanThreshold"
-  evaluation_periods  = 1
-  metric_name         = "CPUUtilization"
-  namespace           = "AWS/EC2"
-  period              = 60
-  statistic           = "Average"
-  threshold           = 80
-  alarm_description   = "Alarm if CPU > 80%"
+# resource "aws_cloudwatch_metric_alarm" "system_status_alert_critical" {
+#   alarm_name                = "SystemStatusAlertCRITICAL"
+#   comparison_operator       = "GreaterThanThreshold"
+#   evaluation_periods        = 2
+#   metric_name               = "StatusCheckFailed_System"
+#   namespace                 = "AWS/EC2"
+#   period                    = 60
+#   statistic                 = "Minimum"
+#   threshold                 = 0
+#   alarm_description         = "System Status Check Failed"
+#   alarm_actions             = [aws_sns_topic.critical_sns.arn, "arn:aws:automate:${var.region}:ec2:recover"]
+#   ok_actions                = [aws_sns_topic.warning_sns.arn]
+#   dimensions = {
+#     InstanceId = aws_instance.generic.id
+#   }
+# }
 
-  dimensions = {
-    AutoScalingGroupName = aws_autoscaling_group.ec2_asg.name
-  }
+# resource "aws_iam_role" "ssm_automation_role" {
+#   name = "SSMAutomationRole"
 
-  alarm_actions = [
-    aws_autoscaling_policy.scaling_policy.arn
-  ]
-}
+#   assume_role_policy = jsonencode({
+#     Version = "2012-10-17",
+#     Statement = [
+#       {
+#         Effect = "Allow",
+#         Principal = {
+#           Service = "ssm.amazonaws.com"
+#         },
+#         Action = "sts:AssumeRole"
+#       }
+#     ]
+#   })
+# }
 
-resource "aws_security_group" "web_server" {
-  name        = "${var.environment_name}-webapp-sg"
-  description = "Allow HTTP and SSH"
-  vpc_id      = var.vpc_id
+# # Attach AWS’ pre-built policy that covers common SSM Automation actions
+# resource "aws_iam_role_policy_attachment" "ssm_automation_role_attachment" {
+#   role       = aws_iam_role.ssm_automation_role.name
+#   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonSSMAutomationRole"
+# }
 
-  ingress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
+# # Optionally attach more policies if needed (e.g., DS or custom):
+# resource "aws_iam_policy" "ssm_automation_extra" {
+#   name   = "ssm-automation-extra"
+#   policy = jsonencode({
+#     Version = "2012-10-17",
+#     Statement = [
+#       {
+#         Effect: "Allow",
+#         Action: [
+#           "ds:DescribeDirectories",
+#           "ds:CreateComputer",
+#           "ds:AuthorizeApplication",
+#           "ds:UnauthorizeApplication"
+#         ],
+#         Resource = "*"
+#       }
+#     ]
+#   })
+# }
 
-  ingress {
-    from_port   = 443
-    to_port     = 443
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  ingress {
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags = merge(
-    {
-      Name = "${var.Environment}-ec2-sg-${var.team}"
-    },
-    var.tags
-    )
-}
-
-resource "aws_lb" "alb" {
-  name               = "ngl-test-alb"
-  internal           = true
-  load_balancer_type = "application"
-  security_groups    = [aws_security_group.web_server.id]
-  #subnets            = var.subnet_ids
-  subnets = length(var.subnet_ids) > 0 ? var.subnet_ids : [var.vpc_ec2_subnet1, var.vpc_ec2_subnet2]
-
-  tags = merge(
-    {
-      Name = "${var.Environment}-ec2-alb-${var.team}"
-    },
-    var.tags
-    )
-}
-
-resource "aws_lb_target_group" "ec2_target_group" {
-  name        = "ngl-test-alb-trp"
-  port        = 80
-  protocol    = "HTTP"
-  vpc_id      = var.vpc_id
-
-  health_check {
-    enabled             = true
-    interval            = 30
-    healthy_threshold   = 5
-    unhealthy_threshold = 5
-    matcher             = "200"
-    port     = "80"
-    protocol = "HTTP"
-    path     = "/"
-    timeout  = 5
-  }
-
-  tags = {
-    Name         = "NGL-AAE2-IP-VSA01CloudFormationTG"
-    Project      = "infrastructure-tools"
-    Environment  = var.environment_name
-    Backup       = "true"
-    Service-Name = "infrastructure"
-  }
-}
-
-resource "aws_lb_listener" "alb_listener" {
-  load_balancer_arn = aws_lb.alb.arn
-  port              = 80
-  protocol          = "HTTP"
-
-  default_action {
-    type             = "forward"
-    target_group_arn = aws_lb_target_group.ec2_target_group.arn
-  }
-}
-
-resource "aws_sns_topic" "warning_sns" {
-  name = var.warning_sns
-}
-
-resource "aws_sns_topic" "critical_sns" {
-  name = var.critical_sns
-}
-
-resource "aws_sns_topic_subscription" "warning_email" {
-  topic_arn = aws_sns_topic.warning_sns.arn
-  protocol  = "email"
-  endpoint  = var.email_address
-}
-
-resource "aws_sns_topic_subscription" "critical_email" {
-  topic_arn = aws_sns_topic.critical_sns.arn
-  protocol  = "email"
-  endpoint  = var.email_address
-}
-
-# CloudWatch Alarms
-resource "aws_cloudwatch_metric_alarm" "cpu_alarm_warning" {
-  alarm_name                = "CPUAlarmWARNING"
-  comparison_operator       = "GreaterThanOrEqualToThreshold"
-  evaluation_periods        = 1
-  metric_name               = "CPUUtilization"
-  namespace                 = "AWS/EC2"
-  period                    = 300
-  statistic                 = "Average"
-  threshold                 = 70
-  alarm_description         = "High CPU Usage 70%"
-  alarm_actions             = [aws_sns_topic.critical_sns.arn]
-  ok_actions                = [aws_sns_topic.warning_sns.arn]
-  dimensions = {
-    InstanceId = aws_instance.generic.id
-  }
-}
-
-resource "aws_cloudwatch_metric_alarm" "memory_alarm_critical" {
-  alarm_name                = "MemoryAlarmCRITICAL"
-  comparison_operator       = "GreaterThanOrEqualToThreshold"
-  evaluation_periods        = 1
-  metric_name               = "mem_used_percent"
-  namespace                 = "CWAgent"
-  period                    = 900
-  statistic                 = "Average"
-  threshold                 = 90
-  alarm_description         = "High Memory Usage 90%"
-  alarm_actions             = [aws_sns_topic.critical_sns.arn]
-  ok_actions                = [aws_sns_topic.warning_sns.arn]
-  dimensions = {
-    InstanceId = aws_instance.generic.id
-  }
-}
-
-resource "aws_cloudwatch_metric_alarm" "instance_status_alarm_critical" {
-  alarm_name                = "InstanceStatusAlarmCRITICAL"
-  comparison_operator       = "GreaterThanThreshold"
-  evaluation_periods        = 3
-  metric_name               = "StatusCheckFailed_Instance"
-  namespace                 = "AWS/EC2"
-  period                    = 120
-  statistic                 = "Minimum"
-  threshold                 = 0
-  alarm_description         = "Instance Status Check Failed"
-  alarm_actions             = [aws_sns_topic.critical_sns.arn]
-  ok_actions                = [aws_sns_topic.warning_sns.arn]
-  dimensions = {
-    InstanceId = aws_instance.generic.id
-  }
-}
-
-resource "aws_cloudwatch_metric_alarm" "disk_space_alarm_critical" {
-  alarm_name                = "DiskSpaceAlarmCRITICAL"
-  comparison_operator       = "GreaterThanOrEqualToThreshold"
-  evaluation_periods        = 1
-  metric_name               = "disk_used_percent"
-  namespace                 = "CWAgent"
-  period                    = 300
-  statistic                 = "Average"
-  threshold                 = 95
-  alarm_description         = "Disk Space Usage Over 95%"
-  alarm_actions             = [aws_sns_topic.critical_sns.arn]
-  ok_actions                = [aws_sns_topic.warning_sns.arn]
-  dimensions = {
-    InstanceId = aws_instance.generic.id
-    device     = var.volume
-    path       = var.path
-    fstype     = var.fstype
-  }
-}
-
-resource "aws_cloudwatch_metric_alarm" "system_status_alert_critical" {
-  alarm_name                = "SystemStatusAlertCRITICAL"
-  comparison_operator       = "GreaterThanThreshold"
-  evaluation_periods        = 2
-  metric_name               = "StatusCheckFailed_System"
-  namespace                 = "AWS/EC2"
-  period                    = 60
-  statistic                 = "Minimum"
-  threshold                 = 0
-  alarm_description         = "System Status Check Failed"
-  alarm_actions             = [aws_sns_topic.critical_sns.arn, "arn:aws:automate:${var.region}:ec2:recover"]
-  ok_actions                = [aws_sns_topic.warning_sns.arn]
-  dimensions = {
-    InstanceId = aws_instance.generic.id
-  }
-}
-
-resource "aws_iam_role" "ssm_automation_role" {
-  name = "SSMAutomationRole"
-
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [
-      {
-        Effect = "Allow",
-        Principal = {
-          Service = "ssm.amazonaws.com"
-        },
-        Action = "sts:AssumeRole"
-      }
-    ]
-  })
-}
-
-# Attach AWS’ pre-built policy that covers common SSM Automation actions
-resource "aws_iam_role_policy_attachment" "ssm_automation_role_attachment" {
-  role       = aws_iam_role.ssm_automation_role.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonSSMAutomationRole"
-}
-
-# Optionally attach more policies if needed (e.g., DS or custom):
-resource "aws_iam_policy" "ssm_automation_extra" {
-  name   = "ssm-automation-extra"
-  policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [
-      {
-        Effect: "Allow",
-        Action: [
-          "ds:DescribeDirectories",
-          "ds:CreateComputer",
-          "ds:AuthorizeApplication",
-          "ds:UnauthorizeApplication"
-        ],
-        Resource = "*"
-      }
-    ]
-  })
-}
-
-resource "aws_iam_role_policy_attachment" "attach_ssm_automation_extra" {
-  role       = aws_iam_role.ssm_automation_role.name
-  policy_arn = aws_iam_policy.ssm_automation_extra.arn
-}
+# resource "aws_iam_role_policy_attachment" "attach_ssm_automation_extra" {
+#   role       = aws_iam_role.ssm_automation_role.name
+#   policy_arn = aws_iam_policy.ssm_automation_extra.arn
+# }
 
 
 
@@ -877,113 +836,113 @@ resource "aws_iam_role_policy_attachment" "attach_ssm_automation_extra" {
 # }
 
 
-# AWS EFS file system
-resource "aws_efs_file_system" "ds_efs_file_system" {
-  creation_token   = var.efs_file_system_creation_token
-  encrypted        = var.efs_file_system_encrypted
-  kms_key_id       = var.efs_file_system_kms_key_id
-  performance_mode = var.efs_file_system_performance_mode
+# # AWS EFS file system
+# resource "aws_efs_file_system" "ds_efs_file_system" {
+#   creation_token   = var.efs_file_system_creation_token
+#   encrypted        = var.efs_file_system_encrypted
+#   kms_key_id       = var.efs_file_system_kms_key_id
+#   performance_mode = var.efs_file_system_performance_mode
 
-  throughput_mode  = var.efs_file_system_throughput_mode
-  tags = merge(
-    {
-      Name = "${var.Environment}-ec2-efs-${var.team}"
-    },
-    var.tags
-    )
+#   throughput_mode  = var.efs_file_system_throughput_mode
+#   tags = merge(
+#     {
+#       Name = "${var.Environment}-ec2-efs-${var.team}"
+#     },
+#     var.tags
+#     )
 
-  lifecycle_policy {
-    transition_to_ia = "AFTER_30_DAYS"
-  }
+#   lifecycle_policy {
+#     transition_to_ia = "AFTER_30_DAYS"
+#   }
 
 
-}
+# }
 
-#--mount target
-resource "aws_efs_mount_target" "efs_mount_target" {
-  count = length(var.subnet_ids)
-  file_system_id  = aws_efs_file_system.ds_efs_file_system.id
-  subnet_id       = var.efs_mount_target_subnet_ids[count.index]
-  #ip_address      = var.efs_mount_target_ip_address
-  security_groups = [aws_security_group.efs_security_grp.id]
+# #--mount target
+# resource "aws_efs_mount_target" "efs_mount_target" {
+#   count = length(var.subnet_ids)
+#   file_system_id  = aws_efs_file_system.ds_efs_file_system.id
+#   subnet_id       = var.efs_mount_target_subnet_ids[count.index]
+#   #ip_address      = var.efs_mount_target_ip_address
+#   security_groups = [aws_security_group.efs_security_grp.id]
 
-  lifecycle {
-    create_before_destroy = true
-    ignore_changes        = []
-  }
+#   lifecycle {
+#     create_before_destroy = true
+#     ignore_changes        = []
+#   }
 
-  depends_on = [
-    aws_efs_file_system.ds_efs_file_system
-  ]
-}
-/*
-#efs policy
-resource "aws_efs_file_system_policy" "efs_policy" {
-  file_system_id = aws_efs_file_system.ds_efs_file_system.id
-  policy = <<POLICY
-{
-    "Version": "2012-10-17",
-    "Id": "Policy01",
-    "Statement": [
-        {
-            "Sid": "Statement01",
-            "Effect": "Allow",
-            "Principal": {
-                "AWS": "*"
-            },
-            "Resource": "${aws_efs_file_system.ds_efs_file_system.arn}",
-            "Action": [
-                "elasticfilesystem:ClientRootAccess",
-                "elasticfilesystem:ClientMount",
-                "elasticfilesystem:ClientWrite"
-            ],
-            "Condition": {
-                "Bool": {
-                    "aws:SecureTransport": "true"
-                }
-            }
-        }
-    ]
-}
-POLICY
-}
-*/
-resource "aws_efs_backup_policy" "data_science_policy" {
-  file_system_id = aws_efs_file_system.ds_efs_file_system.id
+#   depends_on = [
+#     aws_efs_file_system.ds_efs_file_system
+#   ]
+# }
+# /*
+# #efs policy
+# resource "aws_efs_file_system_policy" "efs_policy" {
+#   file_system_id = aws_efs_file_system.ds_efs_file_system.id
+#   policy = <<POLICY
+# {
+#     "Version": "2012-10-17",
+#     "Id": "Policy01",
+#     "Statement": [
+#         {
+#             "Sid": "Statement01",
+#             "Effect": "Allow",
+#             "Principal": {
+#                 "AWS": "*"
+#             },
+#             "Resource": "${aws_efs_file_system.ds_efs_file_system.arn}",
+#             "Action": [
+#                 "elasticfilesystem:ClientRootAccess",
+#                 "elasticfilesystem:ClientMount",
+#                 "elasticfilesystem:ClientWrite"
+#             ],
+#             "Condition": {
+#                 "Bool": {
+#                     "aws:SecureTransport": "true"
+#                 }
+#             }
+#         }
+#     ]
+# }
+# POLICY
+# }
+# */
+# resource "aws_efs_backup_policy" "data_science_policy" {
+#   file_system_id = aws_efs_file_system.ds_efs_file_system.id
 
-  backup_policy {
-    status = "ENABLED"
-  }
-}
+#   backup_policy {
+#     status = "ENABLED"
+#   }
+# }
 
-resource "aws_security_group" "efs_security_grp" {
-   name = "${var.Environment}-efs-security-group}"
-   description = "Allows inbound efs traffic from ec2"
-   vpc_id     =  var.vpc_id
-   ingress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
+# resource "aws_security_group" "efs_security_grp" {
+#    name = "${var.Environment}-efs-security-group}"
+#    description = "Allows inbound efs traffic from ec2"
+#    vpc_id     =  var.vpc_id
+#    ingress {
+#     from_port   = 80
+#     to_port     = 80
+#     protocol    = "tcp"
+#     cidr_blocks = ["0.0.0.0/0"]
+#   }
 
-  ingress {
-    from_port   = 2049
-    to_port     = 2049
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
+#   ingress {
+#     from_port   = 2049
+#     to_port     = 2049
+#     protocol    = "tcp"
+#     cidr_blocks = ["0.0.0.0/0"]
+#   }
 
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-   tags = merge(
-    {
-      Name = "${var.Environment}-efs-resiliency-${var.team}"
-    },
-    var.tags
-   )
- }
+#   egress {
+#     from_port   = 0
+#     to_port     = 0
+#     protocol    = "-1"
+#     cidr_blocks = ["0.0.0.0/0"]
+#   }
+#    tags = merge(
+#     {
+#       Name = "${var.Environment}-efs-resiliency-${var.team}"
+#     },
+#     var.tags
+#    )
+#  }
