@@ -99,7 +99,9 @@ resource "aws_ssm_document" "install_agents" {
           "InstanceIds": "{{ InstanceIds }}",
           "Parameters": {
             "commands": [
-              "Start-Process msiexec -ArgumentList \"/i C:\\Temp\\AWSCLIV2.msi /quiet /norestart\" -Wait"
+              "Start-Process msiexec -ArgumentList \"/i C:\\Temp\\AWSCLIV2.msi /quiet /norestart\" -Wait",
+              "$awsCliPath = 'C:\\Program Files\\Amazon\\AWSCLIV2'",
+              "[Environment]::SetEnvironmentVariable('PATH', $env:PATH + ';' + $awsCliPath, [EnvironmentVariableTarget]::Machine)"
             ]
           }
         }
@@ -112,8 +114,10 @@ resource "aws_ssm_document" "install_agents" {
           InstanceIds  = "{{ InstanceIds }}"
           Parameters   = {
             commands = [
-              "$installer = \"C:\\Scripts\\CROWDSTRIKE.EXE\"",
-              "aws s3 cp s3://${var.bucket_name}/CROWDSTRIKE.EXE $installer",
+              #"$installer = \"C:\\Scripts\\CROWDSTRIKE.EXE\"",
+              "$installer = \"C:\\Scripts\\FalconSensor_Windows_F9E4A28AD0844A9382BF5114BC2ECF9E-C9.exe\"",
+              #"aws s3 cp s3://${var.bucket_name}/CROWDSTRIKE.EXE $installer",
+              "aws s3 cp s3://${var.bucketname}/FalconSensor_Windows_F9E4A28AD0844A9382BF5114BC2ECF9E-C9.exe $installer",
               "Start-Process $installer -Wait"
             ]
           }
